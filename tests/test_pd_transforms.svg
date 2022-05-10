@@ -1,0 +1,333 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:ns1="http://www.w3.org/1999/xlink" version="1.1" viewBox="0 0 480 480">
+  <g id="grid" fill="none">
+    <path stroke="#666" stroke-width=".5" d="M80,0v480m80,0v-480m80,0v480m80,0v-480m80,0v480     M0,80h480m0,80h-480m0,80h480m0,80h-480m0,80h480" />
+    <path stroke="#aaa" stroke-width=".2" d="M20,0v480m20,0v-480m20,0v480     M100,0v480m20,0v-480m20,0v480     M180,0v480m20,0v-480m20,0v480     M260,0v480m20,0v-480m20,0v480     M340,0v480m20,0v-480m20,0v480     M420,0v480m20,0v-480m20,0v480     M0,20h480m0,20h-480m0,20h480     M0,100h480m0,20h-480m0,20h480     M0,180h480m0,20h-480m0,20h480     M0,260h480m0,20h-480m0,20h480     M0,340h480m0,20h-480m0,20h480     M0,420h480m0,20h-480m0,20h480" />
+  </g>
+  <defs>
+    <rect id="frame-for-original" x="1" y="1" width="78" height="78" fill="none" stroke="rgba(255,0,0,.3)" stroke-width="2" />
+  </defs>
+  
+  <g id="A1">
+    <use ns1:href="#frame-for-original" />
+    <text x="2" y="2" font-family="sans-serif" font-size="4" dominant-baseline="text-before-edge">
+      A1:Lines
+    </text>
+    <path fill="none" stroke="black" stroke-width="2" d="m 10,20 10,-10 v 60 m -10,0 l 20,0 m 20,-60 c -10,0 -20,10 -20,30 0,20 10,30 20,30 C 60,70 70,60 70,40 c 0,-20 -10,-30 -20,-30 z m 0,10 v 40" />
+    <path fill="yellow" stroke="aqua" stroke-width="2" d="M 45,30 Q 35,30 35,40 q 0,10 10,10 z m 10,20 q 10,0 10,-10 0,-10 -10,-10 z" />
+  </g>
+  
+  <g id="B1" transform="translate(80,0)">
+    <text x="2" y="2" font-family="sans-serif" font-size="4" dominant-baseline="text-before-edge">
+      A1:absolutise()
+    </text>
+    <text font-size="60" font-weight="bold" text-anchor="middle" dominant-baseline="central" x="40" y="40" fill="silver" opacity=".5" kerning="-5">
+      B1
+    </text>
+  <path fill="none" stroke="black" stroke-width="2" d="M 10,20 20,10 V 70 M 10,70 L 30,70 M 50,10 C 40,10 30,20 30,40 30,60 40,70 50,70 C 60,70 70,60 70,40 C 70,20 60,10 50,10 Z M 50,20 V 60" /><path fill="yellow" stroke="aqua" stroke-width="2" d="M 45,30 Q 35,30 35,40 Q 35,50 45,50 Z M 55,50 Q 65,50 65,40 65,30 55,30 Z" /></g>
+  
+  <g id="C1" transform="translate(160,0) rotate(60, 40, 40)">
+    <use ns1:href="#frame-for-original" />
+    <text x="2" y="2" font-family="sans-serif" font-size="4" dominant-baseline="text-before-edge">
+      A1:rotate(60)
+    </text>
+    <path fill="none" stroke="black" stroke-width="2" d="m 10,20 10,-10 v 60 m -10,0 l 20,0 m 20,-60 c -10,0 -20,10 -20,30 0,20 10,30 20,30 C 60,70 70,60 70,40 c 0,-20 -10,-30 -20,-30 z m 0,10 v 40" />
+    <path fill="yellow" stroke="aqua" stroke-width="2" d="M 45,30 Q 35,30 35,40 q 0,10 10,10 z m 10,20 q 10,0 10,-10 0,-10 -10,-10 z" />
+  </g>
+
+  <g id="D1" transform="translate(240,0)">
+    <text x="2" y="2" font-family="sans-serif" font-size="4" dominant-baseline="text-before-edge">
+      A1:rotate(60)
+    </text>
+    <text font-size="60" font-weight="bold" text-anchor="middle" dominant-baseline="central" x="40" y="40" fill="silver" opacity=".5" kerning="-5">
+      D1
+    </text>
+  <path fill="none" stroke="black" stroke-width="2" d="m 42.3205,4.0192 13.6603,3.6603 l -51.9615,30 m -5,-8.6603 l 10,17.3205 m 61.9615,-12.6795 c -5,-8.6603 -18.6603,-12.3205 -35.9808,-2.3205 -17.3205,10 -20.9808,23.6603 -15.9808,32.3205 C 24.0192,72.3205 37.6795,75.9808 55,65.9808 c 17.3205,-10 20.9808,-23.6603 15.9808,-32.3205 z m -8.6603,5 l -34.641,20" /><path fill="yellow" stroke="aqua" stroke-width="2" d="M 51.1603,39.3301 Q 46.1603,30.6699 37.5,35.6699 q -8.6603,5 -3.6603,13.6603 z m -12.3205,18.6603 q 5,8.6603 13.6603,3.6603 8.6603,-5 3.6603,-13.6603 z" /></g>
+  
+  <g id="E1" transform="translate(320,0)">
+    <text x="2" y="2" font-family="sans-serif" font-size="4" dominant-baseline="text-before-edge">
+      A1:rotate(-90)
+    </text>
+    <text font-size="60" font-weight="bold" text-anchor="middle" dominant-baseline="central" x="40" y="40" fill="silver" opacity=".5" kerning="-5">
+      E1
+    </text>
+  <path fill="none" stroke="black" stroke-width="2" d="m 20,70 -10,-10 l 60,0 m 0,10 l 0,-20 m -60,-20 c 0,10 10,20 30,20 20,0 30,-10 30,-20 C 70,20 60,10 40,10 c -20,0 -30,10 -30,20 z m 10,0 l 40,0" /><path fill="yellow" stroke="aqua" stroke-width="2" d="M 30,35 Q 30,45 40,45 q 10,0 10,-10 z m 20,-10 q 0,-10 -10,-10 -10,0 -10,10 z" /></g>
+
+  <g id="F1" transform="translate(400,0)">
+    <text x="2" y="2" font-family="sans-serif" font-size="4" dominant-baseline="text-before-edge">
+      A1:rotate(180)
+    </text>
+    <text font-size="60" font-weight="bold" text-anchor="middle" dominant-baseline="central" x="40" y="40" fill="silver" opacity=".5" kerning="-5">
+      F1
+    </text>
+  <path fill="none" stroke="black" stroke-width="2" d="m 70,60 -10,10 l 0,-60 m 10,0 l -20,0 m -20,60 c 10,0 20,-10 20,-30 0,-20 -10,-30 -20,-30 C 20,10 10,20 10,40 c 0,20 10,30 20,30 z m 0,-10 l 0,-40" /><path fill="yellow" stroke="aqua" stroke-width="2" d="M 35,50 Q 45,50 45,40 q 0,-10 -10,-10 z m -10,-20 q -10,0 -10,10 0,10 10,10 z" /></g>
+  
+  <g id="A2" transform="translate(0,80) translate(40,40) scale(-1,1) translate(-40,-40)">
+    <use ns1:href="#frame-for-original" />
+    <text x="2" y="2" font-family="sans-serif" font-size="4" dominant-baseline="text-before-edge">
+      A1:scale(-1,1)
+    </text>
+    <path fill="none" stroke="black" stroke-width="2" d="m 10,20 10,-10 v 60 m -10,0 l 20,0 m 20,-60 c -10,0 -20,10 -20,30 0,20 10,30 20,30 C 60,70 70,60 70,40 c 0,-20 -10,-30 -20,-30 z m 0,10 v 40" />
+    <path fill="yellow" stroke="aqua" stroke-width="2" d="M 45,30 Q 35,30 35,40 q 0,10 10,10 z m 10,20 q 10,0 10,-10 0,-10 -10,-10 z" />
+  </g>
+  
+  <g id="B2" transform="translate(80,80)">
+    <text x="2" y="2" font-family="sans-serif" font-size="4" dominant-baseline="text-before-edge">
+      A1:scale(-1,1)
+    </text>
+    <text font-size="60" font-weight="bold" text-anchor="middle" dominant-baseline="central" x="40" y="40" fill="silver" opacity=".5" kerning="-5">
+      B2
+    </text>
+  <path fill="none" stroke="black" stroke-width="2" d="m 70,20 -10,-10 l 0,60 m 10,0 l -20,0 m -20,-60 c 10,0 20,10 20,30 0,20 -10,30 -20,30 C 20,70 10,60 10,40 c 0,-20 10,-30 20,-30 z m 0,10 l 0,40" /><path fill="yellow" stroke="aqua" stroke-width="2" d="M 35,30 Q 45,30 45,40 q 0,10 -10,10 z m -10,20 q -10,0 -10,-10 0,-10 10,-10 z" /></g>
+  
+  <g id="C2" transform="translate(160,80) translate(40,40) scale(.8) translate(-40,-40)">
+    <use ns1:href="#frame-for-original" />
+    <text x="2" y="2" font-family="sans-serif" font-size="4" dominant-baseline="text-before-edge">
+      A1:scale(.8)
+    </text>
+    <path fill="none" stroke="black" stroke-width="2" d="m 10,20 10,-10 v 60 m -10,0 l 20,0 m 20,-60 c -10,0 -20,10 -20,30 0,20 10,30 20,30 C 60,70 70,60 70,40 c 0,-20 -10,-30 -20,-30 z m 0,10 v 40" />
+    <path fill="yellow" stroke="aqua" stroke-width="2" d="M 45,30 Q 35,30 35,40 q 0,10 10,10 z m 10,20 q 10,0 10,-10 0,-10 -10,-10 z" />
+  </g>
+  
+  <g id="D2" transform="translate(240,80)">
+    <text x="2" y="2" font-family="sans-serif" font-size="4" dominant-baseline="text-before-edge">
+      A1:scale(.8,-.8)
+    </text>
+    <text font-size="60" font-weight="bold" text-anchor="middle" dominant-baseline="central" x="40" y="40" fill="silver" opacity=".5" kerning="-5">
+      D2
+    </text>
+  <path fill="none" stroke="black" stroke-width="2" d="m 16,56 8,8 l 0,-48 m -8,0 l 16,0 m 16,48 c -8,0 -16,-8 -16,-24 0,-16 8,-24 16,-24 C 56,16 64,24 64,40 c 0,16 -8,24 -16,24 z m 0,-8 l 0,-32" /><path fill="yellow" stroke="aqua" stroke-width="2" d="M 44,48 Q 36,48 36,40 q 0,-8 8,-8 z m 8,-16 q 8,0 8,8 0,8 -8,8 z" /></g>
+
+  <g id="E2" transform="translate(320,80)">
+    <text x="2" y="2" font-family="sans-serif" font-size="4" dominant-baseline="text-before-edge">
+      A1:rotate(60)*scale(.8)
+    </text>
+    <text font-size="60" font-weight="bold" text-anchor="middle" dominant-baseline="central" x="40" y="40" fill="silver" opacity=".5" kerning="-5">
+      E2
+    </text>
+  <path fill="none" stroke="black" stroke-width="2" d="m 41.8564,11.2154 10.9282,2.9282 l -41.5692,24 m -4,-6.9282 l 8,13.8564 m 49.5692,-10.1436 c -4,-6.9282 -14.9282,-9.8564 -28.7846,-1.8564 -13.8564,8 -16.7846,18.9282 -12.7846,25.8564 C 27.2154,65.8564 38.1436,68.7846 52,60.7846 c 13.8564,-8 16.7846,-18.9282 12.7846,-25.8564 z m -6.9282,4 l -27.7128,16" /><path fill="yellow" stroke="aqua" stroke-width="2" d="M 48.9282,39.4641 Q 44.9282,32.5359 38,36.5359 q -6.9282,4 -2.9282,10.9282 z m -9.8564,14.9282 q 4,6.9282 10.9282,2.9282 6.9282,-4 2.9282,-10.9282 z" /></g>
+  
+  <g id="F2" transform="translate(400,80) translate(40,40) skewX(20) translate(-40,-40)">
+    <use ns1:href="#frame-for-original" />
+    <text x="2" y="2" font-family="sans-serif" font-size="4" dominant-baseline="text-before-edge">
+      A1:skewX(20)
+    </text>
+    <path fill="none" stroke="black" stroke-width="2" d="m 10,20 10,-10 v 60 m -10,0 l 20,0 m 20,-60 c -10,0 -20,10 -20,30 0,20 10,30 20,30 C 60,70 70,60 70,40 c 0,-20 -10,-30 -20,-30 z m 0,10 v 40" />
+    <path fill="yellow" stroke="aqua" stroke-width="2" d="M 45,30 Q 35,30 35,40 q 0,10 10,10 z m 10,20 q 10,0 10,-10 0,-10 -10,-10 z" />
+  </g>
+  
+  <g id="A3" transform="translate(0,160)">
+    <use ns1:href="#frame-for-original" />
+    <text x="2" y="2" font-family="sans-serif" font-size="4" dominant-baseline="text-before-edge">
+      A3:Elliptical arcs
+    </text>
+    <path fill="rgba(0,0,0,.2)" stroke="black" stroke-width="1" stroke-linejoin="round" stroke-linecap="round" d="m 30,45 a 20 20 0 11 20,0 z m 20,0 a 25 15 25 11 -20,0 24 12 345 10 20,0 m 5,-20 -30,0 m 15,0 0,15" />
+  </g>
+  
+  <g id="B3" transform="translate(80,160)">
+    <text x="2" y="2" font-family="sans-serif" font-size="4" dominant-baseline="text-before-edge">
+      A3:absolutise()
+    </text>
+    <text font-size="60" font-weight="bold" text-anchor="middle" dominant-baseline="central" x="40" y="40" fill="silver" opacity=".5" kerning="-5">
+      B3
+    </text>
+  <path fill="rgba(0,0,0,.2)" stroke="black" stroke-width="1" stroke-linejoin="round" stroke-linecap="round" d="M 30,45 A 20 20 0 11 50,45 Z M 50,45 A 25 15 25 11 30,45 24 12 345 10 50,45 M 55,25 25,25 M 40,25 40,40" /></g>
+  
+  <g id="C3" transform="translate(160,160) translate(40,40) rotate(120) translate(-40,-40)">
+    <use ns1:href="#frame-for-original" />
+    <text x="2" y="2" font-family="sans-serif" font-size="4" dominant-baseline="text-before-edge">
+      A3:rotate(120)
+    </text>
+    <path fill="rgba(0,0,0,.2)" stroke="black" stroke-width="1" stroke-linejoin="round" stroke-linecap="round" d="m 30,45 a 20 20 0 11 20,0 z m 20,0 a 25 15 25 11 -20,0 24 12 345 10 20,0 m 5,-20 -30,0 m 15,0 0,15" />
+  </g>
+  
+  <g id="D3" transform="translate(240,160)">
+    <text x="2" y="2" font-family="sans-serif" font-size="4" dominant-baseline="text-before-edge">
+      A3:rotate(120)
+    </text>
+    <text font-size="60" font-weight="bold" text-anchor="middle" dominant-baseline="central" x="40" y="40" fill="silver" opacity=".5" kerning="-5">
+      D3
+    </text>
+  <path fill="rgba(0,0,0,.2)" stroke="black" stroke-width="1" stroke-linejoin="round" stroke-linecap="round" d="m 40.6699,28.8397 a 20 20 120 11 -10,17.3205 z m -10,17.3205 a 25 15 145 11 10,-17.3205 24 12 105 10 -10,17.3205 m 14.8205,14.3301 15,-25.9808 m -7.5,12.9904 -12.9904,-7.5" /></g>
+  
+  <g id="E3" transform="translate(320,160)">
+    <text x="2" y="2" font-family="sans-serif" font-size="4" dominant-baseline="text-before-edge">
+      A3:rotate(180)
+    </text>
+    <text font-size="60" font-weight="bold" text-anchor="middle" dominant-baseline="central" x="40" y="40" fill="silver" opacity=".5" kerning="-5">
+      E3
+    </text>
+  <path fill="rgba(0,0,0,.2)" stroke="black" stroke-width="1" stroke-linejoin="round" stroke-linecap="round" d="m 50,35 a 20 20 180 11 -20,0 z m -20,0 a 25 15 205 11 20,0 24 12 165 10 -20,0 m -5,20 30,0 m -15,0 0,-15" /></g>
+
+  <g id="F3" transform="translate(400,160)">
+    <text x="2" y="2" font-family="sans-serif" font-size="4" dominant-baseline="text-before-edge">
+      A1:skewX(20)
+    </text>
+    <text font-size="60" font-weight="bold" text-anchor="middle" dominant-baseline="central" x="40" y="40" fill="silver" opacity=".5" kerning="-5">
+      F3
+    </text>
+  <path fill="none" stroke="black" stroke-width="2" d="m 2.7206,20 6.3603,-10 l 21.8382,60 m -10,0 l 20,0 m -1.8382,-60 c -10,0 -16.3603,10 -9.0809,30 7.2794,20 20.9191,30 30.9191,30 C 70.9191,70 77.2794,60 70,40 c -7.2794,-20 -20.9191,-30 -30.9191,-30 z m 3.6397,10 l 14.5588,40" /><path fill="yellow" stroke="aqua" stroke-width="2" d="M 41.3603,30 Q 31.3603,30 35,40 q 3.6397,10 13.6397,10 z m 17.2794,20 q 10,0 6.3603,-10 -3.6397,-10 -13.6397,-10 z" /></g>
+  
+  <g id="A4" transform="translate(0,240) translate(40,0) scale(-1,1) translate(-40,0)">
+    <use ns1:href="#frame-for-original" />
+    <text x="2" y="2" font-family="sans-serif" font-size="4" dominant-baseline="text-before-edge">
+      A3:scale(-1,1)
+    </text>
+    <path fill="rgba(0,0,0,.2)" stroke="black" stroke-width="1" stroke-linejoin="round" stroke-linecap="round" d="m 30,45 a 20 20 0 11 20,0 z m 20,0 a 25 15 25 11 -20,0 24 12 345 10 20,0 m 5,-20 -30,0 m 15,0 0,15" />
+  </g>
+  
+  <g id="B4" transform="translate(80,240)">
+    <text x="2" y="2" font-family="sans-serif" font-size="4" dominant-baseline="text-before-edge">
+      A3:scale(-1,1)
+    </text>
+    <text font-size="60" font-weight="bold" text-anchor="middle" dominant-baseline="central" x="40" y="40" fill="silver" opacity=".5" kerning="-5">
+      B4
+    </text>
+  <path fill="rgba(0,0,0,.2)" stroke="black" stroke-width="1" stroke-linejoin="round" stroke-linecap="round" d="m 50,45 a 20 20 180 10 -20,0 z m -20,0 a 25 15 155 10 20,0 24 12 195 11 -20,0 m -5,-20 30,0 m -15,0 0,15" /></g>
+  
+  <g id="C4" transform="translate(160,240) translate(40,40) scale(.8) translate(-40,-40)">
+    <rect x="1" y="1" width="78" height="78" fill="none" stroke="rgba(255,0,0,.3)" stroke-width="2" />
+    <text x="2" y="2" font-family="sans-serif" font-size="4" dominant-baseline="text-before-edge">
+      A3:scale(.8)
+    </text>
+    <path fill="rgba(0,0,0,.2)" stroke="black" stroke-width="1" stroke-linejoin="round" stroke-linecap="round" d="m 30,45 a 20 20 0 11 20,0 z m 20,0 a 25 15 25 11 -20,0 24 12 345 10 20,0 m 5,-20 -30,0 m 15,0 0,15" />
+  </g>
+  
+  <g id="D4" transform="translate(240,240)">
+    <text x="2" y="2" font-family="sans-serif" font-size="4" dominant-baseline="text-before-edge">
+      A3:scle(.8,-.8)
+    </text>
+    <text font-size="60" font-weight="bold" text-anchor="middle" dominant-baseline="central" x="40" y="40" fill="silver" opacity=".5" kerning="-5">
+      D4
+    </text>
+  <path fill="rgba(0,0,0,.2)" stroke="black" stroke-width="1" stroke-linejoin="round" stroke-linecap="round" d="m 32,36 a 16 16 0 10 16,0 z m 16,0 a 20 12 335 10 -16,0 19.2 9.6 15 11 16,0 m 4,16 -24,0 m 12,0 0,-12" /></g>
+  
+  <g id="E4" transform="translate(320,240) translate(40,40) skewY(20) translate(-40,-40)">
+    <use ns1:href="#frame-for-original" />
+    <text x="2" y="2" font-family="sans-serif" font-size="4" dominant-baseline="text-before-edge">
+      A5:skewY(20)
+    </text>
+    <path fill="none" stroke="black" stroke-width="1" d="m 8,40 c 8,-24 24,-24 32,0 s 24,24 32,0 q 16,-48 -32,0 t -32,0 32,0 32,0 q 8,-24 -32,0 t -32,0" />
+  </g>
+
+  <g id="F4" transform="translate(400,240)">
+    <text x="2" y="2" font-family="sans-serif" font-size="4" dominant-baseline="text-before-edge">
+      A5:skewY(20)
+    </text>
+    <text font-size="60" font-weight="bold" text-anchor="middle" dominant-baseline="central" x="40" y="40" fill="silver" opacity=".5" kerning="-5">
+      F4
+    </text>
+  <path fill="none" stroke="black" stroke-width="1" d="m 8,28.353 c 8,-21.0882 24,-15.2647 32,11.647 s 24,32.7353 32,11.647 q 16,-42.1765 -32,-11.647 t -32,-11.647 32,11.647 32,11.647 q 8,-21.0882 -32,-11.647 t -32,-11.647" /></g>
+  
+  <g id="A5" transform="translate(0,320)">
+    <use ns1:href="#frame-for-original" />
+    <text x="2" y="2" font-family="sans-serif" font-size="4" dominant-baseline="text-before-edge">
+      A5:Smooth curves
+    </text>
+    <path fill="none" stroke="black" stroke-width="1" d="m 8,40 c 8,-24 24,-24 32,0 s 24,24 32,0 q 16,-48 -32,0 t -32,0 32,0 32,0 q 8,-24 -32,0 t -32,0" />
+  </g>
+
+  <g id="B5" transform="translate(80,320)">
+    <text x="2" y="2" font-family="sans-serif" font-size="4" dominant-baseline="text-before-edge">
+      A5:absolutise()
+    </text>
+    <text font-size="60" font-weight="bold" text-anchor="middle" dominant-baseline="central" x="40" y="40" fill="silver" opacity=".5" kerning="-5">
+      B5
+    </text>
+  <path fill="none" stroke="black" stroke-width="1" d="M 8,40 C 16,16 32,16 40,40 S 64,64 72,40 Q 88,-8 40,40 T 8,40 40,40 72,40 Q 80,16 40,40 T 8,40" /></g>
+
+  <g id="C5" transform="translate(160,320) rotate(-60,40,40)">
+    <use ns1:href="#frame-for-original" />
+    <text x="2" y="2" font-family="sans-serif" font-size="4" dominant-baseline="text-before-edge">
+      A5:rotate(-60)
+    </text>
+    <path fill="none" stroke="black" stroke-width="1" d="m 8,40 c 8,-24 24,-24 32,0 s 24,24 32,0 q 16,-48 -32,0 t -32,0 32,0 32,0 q 8,-24 -32,0 t -32,0" />
+  </g>
+
+  <g id="D5" transform="translate(240,320)">
+    <text x="2" y="2" font-family="sans-serif" font-size="4" dominant-baseline="text-before-edge">
+      A5:rotate(-60)
+    </text>
+    <text font-size="60" font-weight="bold" text-anchor="middle" dominant-baseline="central" x="40" y="40" fill="silver" opacity=".5" kerning="-5">
+      D5
+    </text>
+  <path fill="none" stroke="black" stroke-width="1" d="m 24,67.7128 c -16.7846,-18.9282 -8.7846,-32.7846 16,-27.7128 s 32.7846,-8.7846 16,-27.7128 q -33.5692,-37.8564 -16,27.7128 t -16,27.7128 16,-27.7128 16,-27.7128 q -16.7846,-18.9282 -16,27.7128 t -16,27.7128" /></g>
+  
+  <g id="E5" transform="translate(320,320)">
+    <text x="2" y="2" font-family="sans-serif" font-size="4" dominant-baseline="text-before-edge">
+      A5:rotate(-90)
+    </text>
+    <text font-size="60" font-weight="bold" text-anchor="middle" dominant-baseline="central" x="40" y="40" fill="silver" opacity=".5" kerning="-5">
+      E5
+    </text>
+  <path fill="none" stroke="black" stroke-width="1" d="m 40,72 c -24,-8 -24,-24 0,-32 s 24,-24 0,-32 q -48,-16 0,32 t 0,32 0,-32 0,-32 q -24,-8 0,32 t 0,32" /></g>
+
+  <g id="F5" transform="translate(400,320) translate(40,40) skewY(-10) skewX(-10) translate(-40,-40)">
+    <use ns1:href="#frame-for-original" />
+    <text x="2" y="2" font-family="sans-serif" font-size="4" dominant-baseline="text-before-edge">
+      A3:skewY(-10)*skewX(-10)
+    </text>
+    <path fill="rgba(0,0,0,.2)" stroke="black" stroke-width="1" stroke-linejoin="round" stroke-linecap="round" d="m 30,45 a 20 20 0 11 20,0 z m 20,0 a 25 15 25 11 -20,0 24 12 345 10 20,0 m 5,-20 -30,0 m 15,0 0,15" />
+  </g>
+  
+  <g id="A6" transform="translate(0,400) translate(40,40) scale(-.8,-.8) translate(-40,-40)">
+    <use ns1:href="#frame-for-original" />
+    <text x="2" y="2" font-family="sans-serif" font-size="4" dominant-baseline="text-before-edge">
+      A5:scale(-.8,-.8)
+    </text>
+    <path fill="none" stroke="black" stroke-width="1" d="m 8,40 c 8,-24 24,-24 32,0 s 24,24 32,0 q 16,-48 -32,0 t -32,0 32,0 32,0 q 8,-24 -32,0 t -32,0" />
+  </g>
+
+  <g id="B6" transform="translate(80,400)">
+    <text x="2" y="2" font-family="sans-serif" font-size="4" dominant-baseline="text-before-edge">
+      A5:scale(-.8,-.8)
+    </text>
+    <text font-size="60" font-weight="bold" text-anchor="middle" dominant-baseline="central" x="40" y="40" fill="silver" opacity=".5" kerning="-5">
+      B6
+    </text>
+  <path fill="none" stroke="black" stroke-width="1" d="m 65.6,40 c -6.4,19.2 -19.2,19.2 -25.6,0 s -19.2,-19.2 -25.6,0 q -12.8,38.4 25.6,0 t 25.6,0 -25.6,0 -25.6,0 q -6.4,19.2 25.6,0 t 25.6,0" /></g>
+  
+  <g id="B6" transform="translate(80,400)">
+    <text x="2" y="2" font-family="sans-serif" font-size="4" dominant-baseline="text-before-edge">
+      A5:scale(-.8,-.8)
+    </text>
+    <text font-size="60" font-weight="bold" text-anchor="middle" dominant-baseline="central" x="40" y="40" fill="silver" opacity=".5" kerning="-5">
+      B6
+    </text>
+  </g>
+  
+  <g id="C6" transform="translate(160,400)">
+    <text x="2" y="2" font-family="sans-serif" font-size="4" dominant-baseline="text-before-edge">
+      A1:normalize()
+    </text>
+    <text font-size="60" font-weight="bold" text-anchor="middle" dominant-baseline="central" x="40" y="40" fill="silver" opacity=".5" kerning="-5">
+      C6
+    </text>
+  </g>
+  
+  <g id="D6" transform="translate(240,400)">
+    <text x="2" y="2" font-family="sans-serif" font-size="4" dominant-baseline="text-before-edge">
+      A3:normalize()
+    </text>
+    <text font-size="60" font-weight="bold" text-anchor="middle" dominant-baseline="central" x="40" y="40" fill="silver" opacity=".5" kerning="-5">
+      D6
+    </text>
+  </g>
+  
+  <g id="E6" transform="translate(320,400)">
+    <text x="2" y="2" font-family="sans-serif" font-size="4" dominant-baseline="text-before-edge">
+      A5:normalize()
+    </text>
+    <text font-size="60" font-weight="bold" text-anchor="middle" dominant-baseline="central" x="40" y="40" fill="silver" opacity=".5" kerning="-5">
+      E6
+    </text>
+  </g>
+
+  <g id="F6" transform="translate(400,400)">
+    <text x="2" y="2" font-family="sans-serif" font-size="4" dominant-baseline="text-before-edge">
+      A3:skewY(-10)*skewX(-10)
+    </text>
+    <text font-size="60" font-weight="bold" text-anchor="middle" dominant-baseline="central" x="40" y="40" fill="silver" opacity=".5" kerning="-5">
+      F6
+    </text>
+  </g>
+</svg>

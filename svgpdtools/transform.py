@@ -2,7 +2,7 @@ from __future__ import annotations
 import math
 from dataclasses import dataclass
 
-from svgpdtools.utils import PointLike
+from svgpdtools.utils import PointLike, deg2rad
 
 
 class Transform:
@@ -59,11 +59,15 @@ class Transform:
         t1 = Transform.translate(cx, cy)
         t2 = Transform.translate(-cx, -cy)
 
-        cos, sin = math.cos(_deg2rad(deg)), math.sin(_deg2rad(deg))
+        cos, sin = math.cos(deg2rad(deg)), math.sin(deg2rad(deg))
         tr = Transform(a=cos, b=sin, c=-sin, d=cos)
 
         return t1.concatenated(tr, t2)
 
+    @staticmethod
+    def skewX(deg: float) -> Transform:
+        return Transform(c=math.tan(deg2rad(deg)))
 
-def _deg2rad(deg: float) -> float:
-    return deg * math.pi / 180.0
+    @staticmethod
+    def skewY(deg: float) -> Transform:
+        return Transform(b=math.tan(deg2rad(deg)))
