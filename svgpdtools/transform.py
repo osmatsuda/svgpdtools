@@ -1,6 +1,7 @@
 from __future__ import annotations
 import math
 from dataclasses import dataclass
+from typing import Optional
 
 from svgpdtools.utils import PointLike, deg2rad
 
@@ -41,6 +42,18 @@ class Transform:
         d = self.b * other.c + self.d * other.d
         e = self.a * other.e + self.c * other.f + self.e
         f = self.b * other.e + self.d * other.f + self.f
+        return Transform(a, b, c, d, e, f)
+
+    def inversed(self) -> Transform:
+        det = self.a * self.d - self.b * self.c
+        assert not math.isclose(det, 0, abs_tol=1e-7)
+
+        a = self.d / det
+        b = -self.b / det
+        c = -self.c / det
+        d = self.a / det
+        e = (self.c * self.f - self.d * self.e) / det
+        f = (self.b * self.e - self.a * self.f) / det
         return Transform(a, b, c, d, e, f)
 
     @staticmethod

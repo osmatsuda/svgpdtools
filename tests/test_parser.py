@@ -18,7 +18,7 @@ class TestParserCommand(unittest.TestCase):
         pd = pathdata_from_string(src)
         self.assertEqual(len(pd.data), 7)
         arcs = [] + pd.data[1].data + pd.data[4].data
-        arc_starts = [str(e._arc_start) for e in arcs]
+        arc_starts = [str(e._from_point) for e in arcs]
         earc_centers = [str(e._elliptical_arc_center) for e in arcs]
         earc_starts = [str(e._elliptical_arc_start) for e in arcs]
         self.assertEqual(arc_starts, ['30,45', '50,45', '30,45'])

@@ -1,14 +1,35 @@
-import unittest, pathlib
+import unittest, pathlib, math
 import xml.etree.ElementTree as ET
 
 import svgpdtools as PD
 
 
 class TestPDTransforms(unittest.TestCase):
-    def test_main(self):
+    def test_tranform(self):
+        t = PD.Transform.translate(-10, -20) * PD.Transform.rotate(30) * PD.Transform.scale(.5) * PD.Transform.translate(10,20)
+        t_inv = t.inversed()
+        self.assertTrue(is_identity(t*t_inv))
+        self.assertTrue(is_identity(t_inv*t))
+
+        p = PD.Point(100, 200)
+        p_ = p.transformed(t).transformed(t_inv)
+        self.assertEqual(p, p_)
+        
+    #@unittest.skip('')
+    def test_make_test_path_svg(self):
         make_test_path_svg()
 
 
+def is_identity(t: PD.Transform) -> bool:
+    return all([
+        math.isclose(t.a, 1),
+        math.isclose(t.b, 0, abs_tol=1e-7),
+        math.isclose(t.c, 0, abs_tol=1e-7),
+        math.isclose(t.d, 1),
+        math.isclose(t.e, 0, abs_tol=1e-7),
+        math.isclose(t.f, 0, abs_tol=1e-7),
+    ])
+    
 def make_test_path_svg():
     ET.register_namespace('', 'http://www.w3.org/2000/svg')
     curdir = pathlib.Path(__file__).parent
@@ -170,7 +191,7 @@ def _make_row_6(root):
         _append_path(B6, path, pd)
         
 def _append_path(container, src_path, pd):
-    _path = ET.fromstringlist([ET.tostring(src_path, encoding='unicode')])
+    _path = ET.fromstring(ET.tostring(src_path, encoding='unicode'))
     _path.set('d', str(pd))
     container.append(_path)
 

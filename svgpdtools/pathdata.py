@@ -43,7 +43,7 @@ class PathData(UserList[Command]):
         for i in range(len(self.data)):
             cmd = self.data[i]
             if isinstance(cmd, HorizontalAndVerticalLineto):
-                self.data[i] = cmd.converted_into_lineto()
+                self.data[i] = cmd.converted_to_lineto()
 
             self.data[i].transform(t)
 

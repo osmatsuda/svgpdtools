@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<svg version="1.1"
+     xmlns="http://www.w3.org/2000/svg"
+     viewBox="0 0 4000 4000">
+  <path id="grid" fill="none" stroke="silver" stroke-width="1"
+	d="M1000,0 v4000 M2000,0 v4000 M3000,0 v4000
+	   M0,1000 h4000 M0,2000 h4000 M0,3000 h4000"/>
+  <g id="A1">
+  </g>
+  <g id="B1" transform="translate(1000,0)">
+  </g>
+  <g id="C1" transform="translate(2000,0)">
+  </g>
+  <g id="D1" transform="translate(3000,0)">
+  </g>
+  <g id="A2" transform="translate(0,1000)">
+  </g>
+  <g id="B2" transform="translate(1000,1000)">
+  </g>
+  <g id="C2" transform="translate(2000,1000)">
+  </g>
+  <g id="D2" transform="translate(3000,1000)">
+  </g>
+  <g id="A3" transform="translate(0,2000)">
+  </g>
+  <g id="B3" transform="translate(1000,2000)">
+  </g>
+  <g id="C3" transform="translate(2000,2000)">
+  </g>
+  <g id="D3" transform="translate(3000,2000)">
+  </g>
+  <g id="A4" transform="translate(0,3000)">
+  </g>
+  <g id="B4" transform="translate(1000,3000)">
+  </g>
+  <g id="C4" transform="translate(2000,3000)">
+  </g>
+  <g id="D4" transform="translate(3000,3000)">
+  </g>
+</svg>

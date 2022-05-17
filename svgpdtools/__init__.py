@@ -1,4 +1,4 @@
-from .point import Point
+from .graphics import Point
 from .transform import Transform
 from .pathdata import PathData
 import svgpdtools.utils

@@ -4,8 +4,9 @@ from collections import UserList
 from dataclasses import dataclass, field, asdict
 import math
 
-from .point import Point
+from .graphics import Point
 from .transform import Transform
+from .ellipticalarc import EllipticalArcItem
 from .utils import number_repr, rad2deg, deg2rad
 
 
@@ -230,6 +231,7 @@ class Lineto(SegmentalLineAndCurve):
 
 
 
+
 class HorizontalAndVerticalLineto(CommandBase[float]):
     """
     H/h: horizontal_lineto (num)+
@@ -301,7 +303,7 @@ class HorizontalAndVerticalLineto(CommandBase[float]):
         self.fn = self.fn.upper()
         return self.end_point
 
-    def converted_into_lineto(self) -> Lineto:
+    def converted_to_lineto(self) -> Lineto:
         from_p = self.start_point
         is_abs = self.fn.isupper()
         
@@ -327,124 +329,6 @@ class HorizontalAndVerticalLineto(CommandBase[float]):
 
 
 
-@dataclass
-class EllipticalArcItem:
-    radii: tuple[float, float]
-    x_axis_rotation: float
-    is_large_arc: bool
-    is_sweep: bool
-    to_point: Point = field(default_factory=Point)
-    _arc_start: Optional[Point] = field(default=None)
-    _elliptical_arc_center: Optional[Point] = field(default=None)
-    _elliptical_arc_start: Optional[Point] = field(default=None)
-
-    def _init_with_start_point(self, sp: Point, is_abs: bool) -> None:
-        self._arc_start = sp.clone()
-        if not is_abs:
-            self.to_point += sp
-
-        phi = deg2rad(self.x_axis_rotation)
-        self._elliptical_arc_center = _elliptical_arc_center(
-            phi = phi,
-            rx = self.rx,
-            ry = self.ry,
-            is_large_arc = self.is_large_arc,
-            is_sweep = self.is_sweep,
-            from_p = sp,
-            to_p = self.to_point,
-        )
-        self._elliptical_arc_start = Point(
-            x = self._elliptical_arc_center.x + math.cos(phi) * self.rx,
-            y = self._elliptical_arc_center.y + math.sin(phi) * self.rx,
-        )
-
-    @property
-    def rx(self) -> float:
-        return self.radii[0]
-    @property
-    def ry(self) -> float:
-        return self.radii[1]
-
-    def repr(self, is_abs: bool) -> str:
-        if self._arc_start is None:
-            raise Exception('Should be initialized with start_point.')
-
-        flags = '1' if self.is_large_arc else '0'
-        flags += '1' if self.is_sweep else '0'
-        to_p = self.to_point if is_abs else (self.to_point - self._arc_start)
-
-        rpr = f'{number_repr(self.rx)} {number_repr(self.ry)}'
-        rpr += f' {number_repr(self.x_axis_rotation)} {flags} {to_p}'
-        return rpr
-
-    def transform(self, t: Transform) -> None:
-        if self._arc_start is None or self._elliptical_arc_center is None or self._elliptical_arc_start is None:
-            raise Exception('Should be initialized with start_point.')
-
-        self.to_point.transform(t)
-        self._arc_start.transform(t)
-        self._elliptical_arc_center.transform(t)
-        self._elliptical_arc_start.transform(t)
-
-        rx2 = self._elliptical_arc_center.distance_to(self._elliptical_arc_start)
-        if not math.isclose(self.rx, rx2):
-            ry2 = self.ry * rx2 / self.rx
-            self.radii = (rx2, ry2)
-
-        self.x_axis_rotation = rad2deg(_x_axis_rotation(
-            cp = self._elliptical_arc_center,
-            sp = self._elliptical_arc_start,
-            rx = rx2,
-        ))
-
-        if t.a * t.d < 0:
-            self.is_sweep = not self.is_sweep
-
-def _x_axis_rotation(cp: Point, sp: Point, rx: float) -> float:
-    dx, dy = sp.x - cp.x, sp.y - cp.y
-
-    if math.isclose(dy, 0, abs_tol=1e-7):
-        if dx > 0:
-            return 0.
-        return math.pi
-    if math.isclose(dx, 0, abs_tol=1e-7):
-        if dy > 0:
-            return math.pi * .5
-        return math.pi * 1.5
-
-    phi = math.atan(dy/dx)
-    if math.isclose(math.acos(dx/rx), math.asin(dy/rx)):
-        return phi
-
-    if dx*dy < 0:
-        if dx < 0:
-            return math.pi + phi
-        return math.pi * 2 - abs(phi)
-    return math.pi + phi
-    
-def _elliptical_arc_center(phi: float,
-                           rx: float, ry: float,
-                           is_large_arc: bool, is_sweep: bool,
-                           from_p: Point, to_p: Point) -> Point:
-    sin_phi = math.sin(phi)
-    cos_phi = math.cos(phi)
-    x1_x2_d2 = (from_p.x - to_p.x) / 2
-    y1_y2_d2 = (from_p.y - to_p.y) / 2
-    x1dsh = cos_phi * x1_x2_d2 + sin_phi * y1_y2_d2
-    y1dsh = -sin_phi * x1_x2_d2 + cos_phi * y1_y2_d2
-
-    sign = 1 if is_large_arc ^ is_sweep else -1
-    sqr_rx, sqr_ry = rx * rx, ry * ry
-    sqr_x1dsh, sqr_y1dsh = x1dsh * x1dsh, y1dsh * y1dsh
-    numr = sqr_rx * sqr_ry - sqr_rx * sqr_y1dsh - sqr_ry * sqr_x1dsh
-    denm = sqr_rx * sqr_y1dsh + sqr_ry * sqr_x1dsh
-    c = sign * math.sqrt(numr / denm)
-    cxdsh = c * rx * y1dsh / ry
-    cydsh = -c * ry * x1dsh / rx
-    return Point(
-        x = cos_phi * cxdsh - sin_phi * cydsh + (from_p.x + to_p.x) / 2,
-        y = sin_phi * cxdsh + cos_phi * cydsh + (from_p.y + to_p.y) / 2,
-    )
 
 class EllipticalArc(CommandBase[EllipticalArcItem]):
     def __repr__(self) -> str:
@@ -482,6 +366,16 @@ class EllipticalArc(CommandBase[EllipticalArcItem]):
         self._repr_relative = called_internally and self._repr_relative
         self.fn = self.fn.upper()
         return self.end_point
+
+    def converted_to_curves(self) -> Curveto:
+        data = []
+        for arc in self.data:
+            data += arc.converted_to_curve_points()
+            
+        fn = 'C'
+        curveto = Curveto(fn, data)
+        curveto.start_point = self.start_point
+        return curveto
 
         
 

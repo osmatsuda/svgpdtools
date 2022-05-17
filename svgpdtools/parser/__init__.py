@@ -4,7 +4,7 @@ from svgpdtools import PathData
 from svgpdtools import Transform
 from svgpdtools.command import (Command, Moveto, Lineto, Curveto, HorizontalAndVerticalLineto,
                                 EllipticalArc, EllipticalArcItem, Close)
-from svgpdtools.point import Point
+from svgpdtools.graphics import Point
 
 
 
