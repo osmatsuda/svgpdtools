@@ -337,11 +337,11 @@
     </text>
   </g>
 
-  <g id="F5" transform="translate(400,320) translate(40,40) skewY(-10) skewX(-10) translate(-40,-40)">
+  <g id="F5" transform="translate(400,320) translate(40,40) skewY(-15) skewX(-15) translate(-40,-40)">
     <use xlink:href="#frame-for-original"/>
     <text
 	x="2" y="2" font-family="sans-serif" font-size="4" dominant-baseline="text-before-edge">
-      A3:skewY(-10)*skewX(-10)
+      A3:skewY(-15)*skewX(-15)
     </text>
     <path fill="rgba(0,0,0,.2)" stroke="black" stroke-width="1" stroke-linejoin="round" stroke-linecap="round"
 	  d="m 30,45 a 20 20 0 11 20,0 z m 20,0 a 25 15 25 11 -20,0 24 12 345 10 20,0 m 5,-20 -30,0 m 15,0 0,15"/>
@@ -418,7 +418,7 @@
   <g id="F6" transform="translate(400,400)">
     <text
 	x="2" y="2" font-family="sans-serif" font-size="4" dominant-baseline="text-before-edge">
-      A3:skewY(-10)*skewX(-10)
+      A3:skewY(-15)*skewX(-15)
     </text>
     <text font-size="60" font-weight="bold" text-anchor="middle" dominant-baseline="central"
 	  x="40" y="40" fill="silver" opacity=".5" kerning="-5">

@@ -15,4 +15,4 @@ def pathdata_from_string(src: str) -> PathData:
     return svgpdtools.parser.pathdata(src)
 
 def transform_from_string(src: str) -> Transform:
-    return svgpdtools.parser.transform(src)
+    return Transform.concat(svgpdtools.parser.transforms(src))

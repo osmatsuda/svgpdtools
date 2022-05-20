@@ -27,8 +27,65 @@ def pathdata(d: str) -> PathData:
 
 
 
-def transform(transform: str) -> Transform:
-    pass
+def transforms(src: str) -> list[Transform]:
+    funs = []
+    rest = _consume_wsp(src)
+    while rest:
+        _rest = rest
+        fun, rest = _make_transform_function(rest)
+        funs.append(fun)
+        rest = _consume_comma_wsp(rest)
+        if rest == _rest:
+            break
+
+    if rest:
+        raise Exception(f'Failed parsing transform functions: {src}')
+
+    return funs
+
+
+
+def _make_transform_function(src: str) -> tuple[Transform, str]:
+    fn, rest = _consume_tf_name(src)
+    args, rest = _consume_tf_args(_consume_wsp(rest), fn)
+    def unknown_function(*args):
+        raise Exception(f'Unknown transform function: {fn}{args}')
+    
+    factory = getattr(Transform, fn, unknown_function)
+    return factory(*args), rest
+
+def _consume_tf_name(src: str) -> tuple[str, str]:
+    for fn in 'matrix translate scale rotate skewX skewY'.split():
+        if src.startswith(fn):
+            return fn, src[len(fn):]
+
+    raise Exception(f'Unknown transform function: {src}')
+
+_tf_args_size_table = {
+    'matrix': (6, 0),
+    'translate': (1, 1),
+    'scale': (1, 1),
+    'rotate': (1, 2),
+    'skewX': (1, 0),
+    'skewY': (1, 0),
+}
+def _consume_tf_args(src: str, fn: str) -> tuple[list[float], str]:
+    if src[0] != '(':
+        raise Exception(f'Cannot parse transform function\'s arguments {src}')
+
+    args_size = _tf_args_size_table[fn]
+    args, rest = _consume_float_nums(_consume_wsp(src[1:]), args_size[0])
+
+    rest = _consume_wsp(rest)
+    if rest[0] == ')':
+        return args, rest[1:]
+    
+    args_opt, rest = _consume_float_nums(_consume_comma_wsp(rest), args_size[1])
+    rest = _consume_wsp(rest)
+    if rest[0] != ')':
+        raise Exception(f'Cannot parse transform function\'s arguments {src}')
+
+    return args + args_opt, rest[1:]
 
 
 

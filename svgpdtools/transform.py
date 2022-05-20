@@ -1,7 +1,7 @@
 from __future__ import annotations
 import math
 from dataclasses import dataclass
-from typing import Optional
+from typing import Optional, Iterable
 
 from svgpdtools.utils import PointLike, deg2rad
 
@@ -57,6 +57,10 @@ class Transform:
         return Transform(a, b, c, d, e, f)
 
     @staticmethod
+    def matrix(a: float, b: float, c: float, d: float, e: float, f: float) -> Transform:
+        return Transform(a, b, c, d, e, f)
+    
+    @staticmethod
     def translate(dx: float, dy = 0., /) -> Transform:
         return Transform(e=dx, f=dy)
 
@@ -84,3 +88,10 @@ class Transform:
     @staticmethod
     def skewY(deg: float) -> Transform:
         return Transform(b=math.tan(deg2rad(deg)))
+
+    @staticmethod
+    def concat(ts: Iterable[Transform]) -> Transform:
+        t = Transform()
+        for _t in ts:
+            t = t * _t
+        return t

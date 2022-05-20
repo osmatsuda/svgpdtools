@@ -25,7 +25,7 @@ class TestParserCommand(unittest.TestCase):
         self.assertEqual(earc_centers, ['40,27.679492', '47.905081,60.295468', '32.693603,56.699606'])
         self.assertEqual(earc_starts, ['60,27.679492', '70.562775,70.860925', '55.875823,50.487949'])
 
-        self.assertEqual(str(pd), src)
+        self.assertEqual(str(pd), 'm 30,45 a 20 20 0 1 1 20,0 z m 20,0 a 25 15 25 1 1 -20,0 24 12 345 1 0 20,0 m 5,-20 -30,0 m 15,0 0,15')
 
     def test_from_string_basic(self):
         precision(0)

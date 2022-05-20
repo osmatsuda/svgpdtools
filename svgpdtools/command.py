@@ -20,8 +20,10 @@ class Command(Protocol[CommandDataType]):
     fn: str
     start_point: Point
     data: list[CommandDataType]
+    repr_relative: bool
 
     def transform(self, t: Transform) -> None: ...
+    def transformed(self, t: Transform) -> Command: ...
     def absolutize(
             self,
             prev_point: Point,
@@ -37,7 +39,7 @@ class CommandBase(Generic[CommandDataType]):
     def __init__(self, fn: str, data: list[CommandDataType]):
         self.fn = fn
         self.data = data
-        self._repr_relative = fn.islower()
+        self.repr_relative = fn.islower()
         self._start_point: Optional[Point] = None
 
     @property
@@ -50,11 +52,28 @@ class CommandBase(Generic[CommandDataType]):
     def start_point(self, value: Point) -> None:
         self._start_point = value.clone()
 
+    @property
+    def end_point(self) -> Point:
+        raise NotImplementedError
+
+    def absolutize(self, prev_point: Point, *, called_internally: bool=False) -> Point:
+        raise NotImplementedError
+    
+    def transform(self, t: Transform) -> None:
+        raise NotImplementedError
+    
+    def transformed(self, t: Transform) -> Command:
+        me = self.__class__(self.fn, self.data)
+        me.start_point = self.start_point
+        me.repr_relative = self.repr_relative
+        me.transform(t)
+        return me
+
         
 
 class SegmentalLineAndCurve(CommandBase[Point]):
     def __repr__(self) -> str:
-        force_relative = self._repr_relative and self.fn.isupper()
+        force_relative = self.repr_relative and self.fn.isupper()
         rpr = self.fn.lower() if force_relative else self.fn
         for p in (self._relatived_data() if force_relative else self.data):
             rpr += f' {p}'
@@ -98,12 +117,11 @@ class SegmentalLineAndCurve(CommandBase[Point]):
 
     def transform(self, t: Transform) -> None:
         self.start_point.transform(t)
-
         for p in self.data:
             p.transform(t)
 
     def absolutize(self, prev_point: Point, *, called_internally=False) -> Point:
-        self._repr_relative = called_internally and self._repr_relative
+        self.repr_relative = called_internally and self.repr_relative
         if self.fn.isupper(): return self.end_point
 
         cur = prev_point.clone()
@@ -143,7 +161,7 @@ class Moveto(CommandBase[Point]):
         super().__init__(fn, data)
         
     def __repr__(self) -> str:
-        force_relative = self._repr_relative and self.fn.isupper()
+        force_relative = self.repr_relative and self.fn.isupper()
         rpr = self.fn.lower() if force_relative else self.fn
 
         start = 0
@@ -206,8 +224,16 @@ class Moveto(CommandBase[Point]):
         for p in self.data:
             p.transform(t)
             
+    def transformed(self, t: Transform) -> Moveto:
+        me = self.__class__(self.fn, self.data)
+        me.start_point = self.start_point
+        me.repr_relative = self.repr_relative
+        me.is_first_command = self.is_first_command
+        me.transform(t)
+        return me
+    
     def absolutize(self, prev_point: Point, *, called_internally=False) -> Point:
-        self._repr_relative = called_internally and self._repr_relative
+        self.repr_relative = called_internally and self.repr_relative
         if self.fn.isupper():
             return self.end_point
 
@@ -238,7 +264,7 @@ class HorizontalAndVerticalLineto(CommandBase[float]):
     V/v: vertical_lineto   (num)+
     """
     def __repr__(self) -> str:
-        if self._repr_relative and self.fn.isupper():
+        if self.repr_relative and self.fn.isupper():
             rpr = self.fn.lower()
             data = self._relatived_data()
         else:
@@ -291,8 +317,11 @@ class HorizontalAndVerticalLineto(CommandBase[float]):
     def transform(self, t: Transform) -> None:
         assert False, 'Never be reached'
 
+    def transformed(self, t: Transform) -> Command:
+        assert False, 'Never be reached'
+
     def absolutize(self, prev_point: Point, *, called_internally=False) -> Point:
-        self._repr_relative = called_internally and self._repr_relative
+        self.repr_relative = called_internally and self.repr_relative
         if self.fn.isupper(): return self.end_point
 
         if self.fn == 'h':
@@ -324,7 +353,7 @@ class HorizontalAndVerticalLineto(CommandBase[float]):
         )
 
         cmd.start_point = from_p.clone()
-        cmd._repr_relative = self._repr_relative
+        cmd.repr_relative = self.repr_relative
         return cmd
 
 
@@ -332,7 +361,7 @@ class HorizontalAndVerticalLineto(CommandBase[float]):
 
 class EllipticalArc(CommandBase[EllipticalArcItem]):
     def __repr__(self) -> str:
-        force_relative = self._repr_relative and self.fn.isupper()
+        force_relative = self.repr_relative and self.fn.isupper()
         rpr = 'a' if force_relative else self.fn
         for a in self.data:
             rpr += f' {a.repr(self.fn.isupper() and not force_relative)}'
@@ -358,12 +387,17 @@ class EllipticalArc(CommandBase[EllipticalArcItem]):
         return self.data[-1].to_point
 
     def transform(self, t: Transform) -> None:
-        self.start_point.transformed(t)
+        self.start_point.transform(t)
         for a in self.data:
             a.transform(t)
 
+    def transformed(self, t: Transform) -> Command:
+        me = self.converted_to_curves()
+        me.transform(t)
+        return me
+
     def absolutize(self, prev_point: Point, *, called_internally=False) -> Point:
-        self._repr_relative = called_internally and self._repr_relative
+        self.repr_relative = called_internally and self.repr_relative
         self.fn = self.fn.upper()
         return self.end_point
 
@@ -372,9 +406,10 @@ class EllipticalArc(CommandBase[EllipticalArcItem]):
         for arc in self.data:
             data += arc.converted_to_curve_points()
             
-        fn = 'C'
+        fn = 'C' if self.fn.isupper() else 'c'
         curveto = Curveto(fn, data)
         curveto.start_point = self.start_point
+        curveto.repr_relative = self.repr_relative
         return curveto
 
         
@@ -386,7 +421,7 @@ class Close(CommandBase[Point]):
         super().__init__(fn, [])
 
     def __repr__(self) -> str:
-        if self._repr_relative and self.fn.isupper():
+        if self.repr_relative and self.fn.isupper():
             return self.fn.lower()
         return self.fn
 
@@ -398,16 +433,24 @@ class Close(CommandBase[Point]):
 
     @end_point.setter
     def end_point(self, val: Point) -> None:
-        self.data.insert(0, val)
+        self.data.insert(0, val.clone())
         if len(self.data) > 1:
             self.data.pop()
 
     def transform(self, t: Transform) -> None:
-        self.start_point.transformed(t)
+        self.start_point.transform(t)
         self.data[0].transform(t)
 
+    def transformed(self, t: Transform) -> Close:
+        me = self.__class__(self.fn)
+        me.start_point = self.start_point
+        me.end_point = self.end_point
+        me.repr_relative = self.repr_relative
+        me.transform(t)
+        return me
+    
     def absolutize(self, _: Point, *, called_internally=False) -> Point:
-        self._repr_relative = called_internally and self._repr_relative
+        self.repr_relative = called_internally and self.repr_relative
         self.fn = 'Z'
         return self.end_point
     

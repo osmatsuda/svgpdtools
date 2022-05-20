@@ -5,7 +5,7 @@ import svgpdtools as PD
 
 
 class TestPDArc2Curves(unittest.TestCase):
-    #@unittest.skip('')
+    @unittest.skip('')
     def test_main(self):
         _make_test_arc2curves_src_svg()
         _make_test_arc2curves_svg()
@@ -17,7 +17,7 @@ from .graphics import circle_from_3points, random_3points
 def _make_test_arc2curves_svg():
     ET.register_namespace('', 'http://www.w3.org/2000/svg')
     curdir = pathlib.Path(__file__).parent
-    tree = ET.parse(curdir / 'test_pd_arc2curves_src.svg')
+    tree = ET.parse(curdir / 'images/test_pd_arc2curves_src.svg')
     
     svg = tree.getroot()
     for g in svg.iterfind('./{*}g'):
@@ -32,7 +32,7 @@ def _make_test_arc2curves_svg():
         _path = ET.fromstring(f'<path fill="none" stroke="red" stroke-width="3" d="{pd}"/>')
         g.append(_path)        
 
-    tree.write(curdir / 'test_pd_arc2curves.svg', encoding='unicode')
+    tree.write(curdir / 'images/test_pd_arc2curves.svg', encoding='unicode')
 
     
 
@@ -47,7 +47,7 @@ def _make_test_arc2curves_src_svg():
             g = svg.find(f'./{{*}}g[@id="{col+row}"]')
             _make_elliptical_arc(g)
 
-    tree.write(curdir / 'test_pd_arc2curves_src.svg', encoding='unicode')
+    tree.write(curdir / 'images/test_pd_arc2curves_src.svg', encoding='unicode')
 
 
 

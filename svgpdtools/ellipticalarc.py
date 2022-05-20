@@ -50,7 +50,7 @@ class EllipticalArcItem:
             raise Exception('Should be initialized with start_point.')
 
         flags = '1' if self.is_large_arc else '0'
-        flags += '1' if self.is_sweep else '0'
+        flags += ' 1' if self.is_sweep else ' 0'
         to_p = self.to_point if is_abs else (self.to_point - self._from_point)
 
         rpr = f'{number_repr(self.rx)} {number_repr(self.ry)}'
