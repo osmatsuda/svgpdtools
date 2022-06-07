@@ -199,7 +199,7 @@ def _make_row_6(root):
     D6 = _g(root, 'D6')
     for path in _g_paths(root, 'A3'):
         pd = PD.pathdata_from_string(path.get('d'))
-        pd.normalize(use_implicit_lineto=True)
+        pd.normalize(allow_implicit_lineto=True)
         _append_path(D6, path, pd)
 
     E6 = _g(root, 'E6')
@@ -211,7 +211,7 @@ def _make_row_6(root):
     F6 = _g(root, 'F6')
     for path in _g_paths(root, 'A3'):
         pd = PD.pathdata_from_string(path.get('d'))
-        pd.normalize(collapse_elliptical_arc=True, use_implicit_lineto=True)
+        pd.normalize(collapse_elliptical_arc=True, allow_implicit_lineto=True)
         t = _toc * PD.Transform.skewY(-15) * PD.Transform.skewX(-15) * toc
         pd.transform(t)
         _append_path(F6, path, pd)

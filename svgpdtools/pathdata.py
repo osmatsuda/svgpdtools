@@ -6,7 +6,7 @@ from .transform import Transform
 
 
 class PathData(UserList[Command]):
-    def __init__(self, cmds: list[Command] = []):
+    def __init__(self, cmds: list[Command] = []) -> None:
         self._absolutized = False
         super().__init__(cmds)
 
@@ -84,13 +84,13 @@ If it's OK, you can continue to transform by the followings:
                   repr_relative=False,
                   collapse_hv_lineto=False,
                   collapse_elliptical_arc=False,
-                  use_implicit_lineto=False,
+                  allow_implicit_lineto=False,
                   ) -> None:
         
         if not self._absolutized:
             self.absolutize()
 
-        if not use_implicit_lineto:
+        if not allow_implicit_lineto:
             cmds = _collapse_implicit_lineto(self.data[0])
         else:
             cmds = [self.data[0]]
@@ -105,13 +105,13 @@ If it's OK, you can continue to transform by the followings:
                 cmd = cmd.converted_to_lineto()
 
             if cmd.fn == 'M':
-                if not use_implicit_lineto:
+                if not allow_implicit_lineto:
                     cmds += _collapse_implicit_lineto(cmd)
                 else:
                     cmds.append(cmd)
 
             elif cmd.fn == 'L':
-                if ((use_implicit_lineto and prev_cmd.fn == 'M') or
+                if ((allow_implicit_lineto and prev_cmd.fn == 'M') or
                     prev_cmd.fn == 'L'):
                     prev_cmd.data += cmd.data
                 else:

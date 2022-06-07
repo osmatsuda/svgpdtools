@@ -43,8 +43,14 @@ class TestParserTransformBasic(unittest.TestCase):
         self.assertEqual(len(t), 0)
 
     def test_from_string_complex(self):
-        t_str = 'translate(40, 40) rotate(60) translate(-40, -40)'
+        t_str = '''
+        translate(40,40)
+        rotate(60)
+        translate(-40,-40)
+        '''
         ts = P.transforms(t_str)
+        self.assertEqual(' '.join([str(t) for t in ts]),
+                         'translate(40, 40) rotate(60) translate(-40, -40)')
 
         t0 = Transform.rotate(60, 40, 40)
         t1 = Transform.concat(ts)

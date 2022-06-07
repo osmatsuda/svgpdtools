@@ -1,16 +1,30 @@
 from __future__ import annotations
 import math
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Optional, Iterable
 
-from svgpdtools.utils import PointLike, deg2rad
+from svgpdtools.utils import PointLike, deg2rad, number_repr
+
+
+@dataclass
+class _OrgReprForm:
+    command: str
+    values: list[float] = field(default_factory=list)
 
 
 class Transform:
-    def __init__(self, a=1., b=0., c=0., d=1., e=0., f=0.):
+    def __init__(self, a=1., b=0., c=0., d=1., e=0., f=0.) -> None:
         self.a, self.b, self.c, self.d, self.e, self.f = a, b, c, d, e, f
+        self._org_repr_form: Optional[_OrgReprForm] = None
 
     def __repr__(self) -> str:
+        if self._org_repr_form is None:
+            return self.raw_repr()
+
+        vals = [number_repr(n) for n in self._org_repr_form.values]
+        return f"{self._org_repr_form.command}({', '.join(vals)})"
+        
+    def raw_repr(self) -> str:
         l = max([len(str(self.__getattribute__(attr))) for attr in 'abcdef'])
         r = ''
         for attrs in ['ace', 'bdf']:
@@ -58,36 +72,53 @@ class Transform:
 
     @staticmethod
     def matrix(a: float, b: float, c: float, d: float, e: float, f: float) -> Transform:
-        return Transform(a, b, c, d, e, f)
+        t = Transform(a, b, c, d, e, f)
+        t._org_repr_form = _OrgReprForm('matrix', list(locals().values()))
+        return t
     
     @staticmethod
-    def translate(dx: float, dy = 0., /) -> Transform:
-        return Transform(e=dx, f=dy)
+    def translate(dx: float, dy=None, /) -> Transform:
+        org_args = list(filter(lambda v: v is not None, locals().values()))
+        if dy is None:
+            dy = 0.
+        t = Transform(e=dx, f=dy)
+        t._org_repr_form = _OrgReprForm('translate', org_args)
+        return t
 
     @staticmethod
     def scale(sx: float, sy=None, /) -> Transform:
+        org_args = list(filter(lambda v: v is not None, locals().values()))
         if sy is None:
             sy = sx
-            
-        return Transform(a=sx, d=sy)
+        t = Transform(a=sx, d=sy)
+        t._org_repr_form = _OrgReprForm('scale', org_args)
+        return t
 
     @staticmethod
-    def rotate(deg: float, cx=0., cy=0., /) -> Transform:
+    def rotate(deg: float, cx=None, cy=None, /) -> Transform:
+        org_args = list(filter(lambda v: v is not None, locals().values()))
+        if cx is None: cx = 0.
+        if cy is None: cy = 0.
         t1 = Transform.translate(cx, cy)
         t2 = Transform.translate(-cx, -cy)
-
-        cos, sin = math.cos(deg2rad(deg)), math.sin(deg2rad(deg))
+        cos = math.cos(deg2rad(deg))
+        sin = math.sin(deg2rad(deg))
         tr = Transform(a=cos, b=sin, c=-sin, d=cos)
-
-        return t1.concatenated(tr, t2)
+        t = t1.concatenated(tr, t2)
+        t._org_repr_form = _OrgReprForm('rotate', org_args)
+        return t
 
     @staticmethod
     def skewX(deg: float) -> Transform:
-        return Transform(c=math.tan(deg2rad(deg)))
+        t = Transform(c=math.tan(deg2rad(deg)))
+        t._org_repr_form = _OrgReprForm('skewX', [deg])
+        return t
 
     @staticmethod
     def skewY(deg: float) -> Transform:
-        return Transform(b=math.tan(deg2rad(deg)))
+        t = Transform(b=math.tan(deg2rad(deg)))
+        t._org_repr_form = _OrgReprForm('skewY', [deg])
+        return t
 
     @staticmethod
     def concat(ts: Iterable[Transform]) -> Transform:

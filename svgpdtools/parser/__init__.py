@@ -2,8 +2,8 @@ from typing import Sequence
 
 from svgpdtools import PathData
 from svgpdtools import Transform
-from svgpdtools.command import (Command, Moveto, Lineto, Curveto, HorizontalAndVerticalLineto,
-                                EllipticalArc, EllipticalArcItem, Close)
+from svgpdtools.command import Command, Moveto, Lineto, Curveto, HorizontalAndVerticalLineto,\
+    EllipticalArc, EllipticalArcItem, Close
 from svgpdtools.graphics import Point
 
 
@@ -62,6 +62,7 @@ def _consume_tf_name(src: str) -> tuple[str, str]:
     raise Exception(f'Unknown transform function: {src}')
 
 _tf_args_size_table = {
+    # command_name: (required, optional)
     'matrix': (6, 0),
     'translate': (1, 1),
     'scale': (1, 1),

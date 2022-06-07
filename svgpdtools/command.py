@@ -36,7 +36,7 @@ class Command(Protocol[CommandDataType]):
 
 
 class CommandBase(Generic[CommandDataType]):
-    def __init__(self, fn: str, data: list[CommandDataType]):
+    def __init__(self, fn: str, data: list[CommandDataType]) -> None:
         self.fn = fn
         self.data = data
         self.repr_relative = fn.islower()
@@ -156,7 +156,7 @@ class Moveto(CommandBase[Point]):
     """
     M/m: moveto (p)+
     """
-    def __init__(self, fn: str, data: list[Point], is_first_command: bool=False):
+    def __init__(self, fn: str, data: list[Point], is_first_command: bool=False) -> None:
         self.is_first_command = is_first_command
         super().__init__(fn, data)
         
@@ -248,13 +248,11 @@ class Moveto(CommandBase[Point]):
 
 
     
-    
 class Lineto(SegmentalLineAndCurve):
     """
     L/l: lineto (p)+
     """
     pass
-
 
 
 
@@ -358,7 +356,6 @@ class HorizontalAndVerticalLineto(CommandBase[float]):
 
 
 
-
 class EllipticalArc(CommandBase[EllipticalArcItem]):
     def __repr__(self) -> str:
         force_relative = self.repr_relative and self.fn.isupper()
@@ -411,12 +408,11 @@ class EllipticalArc(CommandBase[EllipticalArcItem]):
         curveto.start_point = self.start_point
         curveto.repr_relative = self.repr_relative
         return curveto
-
         
 
 
 class Close(CommandBase[Point]):
-    def __init__(self, fn: str):
+    def __init__(self, fn: str) -> None:
         self.fn = fn
         super().__init__(fn, [])
 
