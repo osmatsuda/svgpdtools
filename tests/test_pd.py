@@ -8,6 +8,11 @@ class TestPD(unittest.TestCase):
         self.pd2 = PD.pathdata_from_string('M 45,30 Q 35,30 35,40 q 0,10 10,10 z m 10,20 q 10,0 10,-10 0,-10 -10,-10 z')
         self.pd3 = PD.pathdata_from_string('m 30,45 a 20 20 0 11 20,0 z m 20,0 a 25 15 25 11 -20,0 24 12 345 10 20,0 m 5,-20 -30,0 m 15,0 0,15')
 
+    def test_basic(self):
+        pd = PD.pathdata_from_string('')
+        pd.normalize()
+        self.assertEqual(str(pd), '')
+        
     #@unittest.skip('')
     def test_normalize2(self):
         self.pd1.normalize(collapse_hv_lineto=True, repr_relative=True)

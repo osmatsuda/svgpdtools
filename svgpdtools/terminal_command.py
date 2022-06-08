@@ -1,15 +1,15 @@
 from __future__ import annotations
-import argparse, pathlib, weakref, errno
+import argparse, pathlib, weakref, errno, sys, traceback
 import xml.sax as SAX
-from xml.sax import parse, make_parser
+from xml.sax import make_parser
 from xml.sax.handler import ContentHandler
 from xml.sax.xmlreader import AttributesImpl, Locator
 from xml.sax.saxutils import XMLGenerator
 from dataclasses import dataclass, field
 from collections.abc import Iterator
-from typing import Any, Protocol
+from typing import Any, Protocol, Optional, Union, TextIO
 
-from svgpdtools import PathData, parser
+from svgpdtools import PathData, Transform, parser, precision
 from svgpdtools.command import Command, Moveto, Lineto, Curveto, HorizontalAndVerticalLineto,\
     EllipticalArc, EllipticalArcItem, Close
 from svgpdtools.utils import number_repr
@@ -89,7 +89,7 @@ Convert pathdata to the following representations:
 
     view = parser.add_argument_group(
         'Command ‘view’',
-        'Search path-elements from the input, and print each path-element in pretty style.',
+        'Search path-elements from the input, and print each path-element in pretty format.',
     )
     
     return parser
@@ -99,35 +99,37 @@ def main() -> None:
     args_parser = _arg_parses()
     try:
         args: Any = args_parser.parse_args(namespace=_Args())
-        if args.help:
-            args_parser.print_help()
-            return
-
-        cmd = globals().get(args.command)
-        if callable(cmd):
-            cmd(args)
-        else:
-            if args.command:
-                print(f'Unknown command: {args.command}\n')
-            args_parser.print_help()
-            return
+        show_help = True
+        if not args.help:
+            command(args)
+            show_help = False
 
     except SAX.SAXReaderNotAvailable:
         print('No XML parsers available.\n')
-        args_parser.print_help()
 
     except FileNotFoundError as e:
         print(f'File not found: {e.filename}\n')
-        args_parser.print_help()
-        
-#    except Exception as e:
-#        print(f'Error: {type(e)}: {e}')
-#        args_parser.print_help()
 
+    except _UnknownCommand as e:
+        if e.name:
+            print(f'Unknown command: {e.name}\n')
+        
+    except:
+        traceback.print_exc()
+
+    finally:
+        if show_help:
+            args_parser.print_help()
+
+
+
+class _UnknownCommand(Exception):
+    def __init__(self, name: str) -> None:
+        self.name = name
 
 class _ArgsProto(Protocol):
     help: bool
-    file: pathlib.Path
+    file: Optional[pathlib.Path]
     command: str
     precision: int
     repr_relative: bool
@@ -149,7 +151,7 @@ class _ParserDelegate:
         self._parser = make_parser()
         self._parser.setContentHandler(handler)
 
-    def parse(self, src: pathlib.Path) -> None:
+    def parse(self, src: Union[TextIO, pathlib.Path]) -> None:
         self._parser.parse(src)
 
     @property
@@ -159,39 +161,88 @@ class _ParserDelegate:
         return -1
 
 
-def normalize(args: _ArgsProto) -> None:
-    """
-    Normalize pathdata in the svg file and output to the stdout.
-    """
-    print(args.__dict__)
+def command(args: _ArgsProto) -> None:
+    input: Union[TextIO, pathlib.Path]
+    if args.file is not None:
+        if not args.file.is_file():
+            raise FileNotFoundError(errno.ENOENT, '', str(args.file))
+        input = args.file
+    else:
+        input = sys.stdin
+
+    precision(args.precision)
+    name = args.command
+    handler: _Handler
+    if name == 'view':
+        handler = PathViewHandler()
+
+    elif name == 'normalize':
+        handler = PathNormalizeHandler(
+            repr_relative = args.repr_relative,
+            collapse_hv_lineto = args.collapse_hv_lineto,
+            collapse_elliptical_arc = args.collapse_elliptical_arc,
+            collapse_transform_attribute = args.collapse_transform_attribute,
+            allow_implicit_lineto = args.allow_implicit_lineto,
+        )
+
+    else:
+        raise _UnknownCommand(name)
+    
+    parser = _ParserDelegate(handler)
+    parser.parse(input)
 
 
 class PathNormalizeHandler(XMLGenerator):
+    def __init__(self, *,
+                 repr_relative: bool,
+                 collapse_transform_attribute: bool,
+                 collapse_elliptical_arc: bool,
+                 collapse_hv_lineto: bool,
+                 allow_implicit_lineto: bool) -> None:
+        self.repr_relative = repr_relative
+        self.collapse_transform_attribute = collapse_transform_attribute
+        self.collapse_hv_lineto = collapse_hv_lineto
+        self.collapse_elliptical_arc = collapse_elliptical_arc
+        self.allow_implicit_lineto = allow_implicit_lineto
+        self.delegate = None
+        super().__init__(sys.stdout, encoding='utf-8', short_empty_elements=True)
+        
     def startElement(self, name: str, attrs: AttributesImpl) -> None:
         if name != 'path':
             super().startElement(name, attrs)
             return
 
         _attrs = {}
+        transforms = []
         for k in attrs.keys():
             if k == 'd':
-                pd = attrs[k]
-                _attrs[k] = pd
+                pd = parser.pathdata(attrs[k])
+            elif k == 'transform':
+                transforms = parser.transforms(attrs[k])
             else:
                 _attrs[k] = attrs[k]
 
+        if transforms:
+            if self.collapse_transform_attribute:
+                pd.transform(
+                    Transform.concat(transforms),
+                    warning=False,
+                    collapse_elliptical_arc=self.collapse_elliptical_arc
+                )
+            else:
+                _attrs['transform'] = ' '.join([str(t) for t in transforms])
+
+        pd.normalize(
+            repr_relative=self.repr_relative,
+            collapse_hv_lineto=self.collapse_hv_lineto,
+            collapse_elliptical_arc=self.collapse_elliptical_arc,
+            allow_implicit_lineto=self.allow_implicit_lineto,
+        )
+        _attrs['d'] = str(pd)
         super().startElement(name, AttributesImpl(_attrs))
 
-
-def view(args: _ArgsProto) -> None:
-    """List up path-elements and pretty print."""
-    if not args.file.is_file():
-        raise FileNotFoundError(errno.ENOENT, '', str(args.file))
-
-    handler = PathViewHandler()
-    parser = _ParserDelegate(handler)
-    parser.parse(args.file)
-
+    def endDocument(self):
+        sys.stdout.write('\n')
 
 class PathViewHandler(ContentHandler):
     def __init__(self) -> None:
@@ -200,7 +251,7 @@ class PathViewHandler(ContentHandler):
         from mako.template import Template
         self.template = Template(text='''\
 %if line_number:
-@ ${line_number}
+@@ ${line_number}
 %endif
 <path
 %if attrs:
@@ -243,8 +294,8 @@ class PathViewHandler(ContentHandler):
     def _boxed_attrs(self, attrs: list[str]) -> str:
         box = _IndentedBox(padding=4, max_column=self.max_column)
         for attr in attrs:
-            box.append_words(attr)
-        return box.text
+            box.append_words(' ' + attr)
+        return box.leading_stripped
 
     def _boxed_transforms(self, transform: str) -> str:
         box = _IndentedBox(padding=15, max_column=self.max_column)

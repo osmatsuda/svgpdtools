@@ -76,6 +76,8 @@ If it's OK, you can continue to transform by the followings:
     def absolutize(self, *, called_internally=False) -> None:
         self._absolutized = True
 
+        if not self.data: return
+
         curr_p = self.data[0].start_point
         for cmd in self.data:
             curr_p = cmd.absolutize(curr_p, called_internally=called_internally)
@@ -89,6 +91,8 @@ If it's OK, you can continue to transform by the followings:
         
         if not self._absolutized:
             self.absolutize()
+
+        if not self.data: return
 
         if not allow_implicit_lineto:
             cmds = _collapse_implicit_lineto(self.data[0])
