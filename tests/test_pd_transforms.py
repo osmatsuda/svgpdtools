@@ -15,7 +15,7 @@ class TestPDTransforms(unittest.TestCase):
         p_ = p.transformed(t).transformed(t_inv)
         self.assertEqual(p, p_)
         
-    @unittest.skip('')
+    @unittest.skip('test_pd_transforms.svg')
     def test_make_test_path_svg(self):
         make_test_path_svg()
 
@@ -57,21 +57,21 @@ def _make_row_1(root):
     for path in _g_paths(root, 'A1'):
         pd = PD.pathdata_from_string(path.get('d'))
         t = PD.Transform.rotate(60, 40, 40)
-        pd.transform(t, warning=False)
+        pd.transform(t, noexception=True)
         _append_path(D1, path, pd)
         
     E1 = _g(root, 'E1')
     for path in _g_paths(root, 'A1'):
         pd = PD.pathdata_from_string(path.get('d'))
         t = PD.Transform.rotate(-90, 40, 40)
-        pd.transform(t, warning=False)
+        pd.transform(t, noexception=True)
         _append_path(E1, path, pd)
         
     F1 = _g(root, 'F1')
     for path in _g_paths(root, 'A1'):
         pd = PD.pathdata_from_string(path.get('d'))
         t = PD.Transform.rotate(180, 40, 40)
-        pd.transform(t, warning=False)
+        pd.transform(t, noexception=True)
         _append_path(F1, path, pd)
 
 def _make_row_2(root):
@@ -82,21 +82,21 @@ def _make_row_2(root):
     for path in _g_paths(root, 'A1'):
         pd = PD.pathdata_from_string(path.get('d'))
         t = _toc * PD.Transform.scale(-1,1) * toc
-        pd.transform(t, warning=False)
+        pd.transform(t, noexception=True)
         _append_path(B2, path, pd)
 
     D2 = _g(root, 'D2')
     for path in _g_paths(root, 'A1'):
         pd = PD.pathdata_from_string(path.get('d'))
         t = _toc * PD.Transform.scale(.8,-.8) * toc
-        pd.transform(t, warning=False)
+        pd.transform(t, noexception=True)
         _append_path(D2, path, pd)
 
     E2 = _g(root, 'E2')
     for path in _g_paths(root, 'A1'):
         pd = PD.pathdata_from_string(path.get('d'))
         t = _toc * PD.Transform.rotate(60) * PD.Transform.scale(.8) * toc
-        pd.transform(t, warning=False)
+        pd.transform(t, noexception=True)
         _append_path(E2, path, pd)
 
 def _make_row_3(root):
@@ -113,21 +113,21 @@ def _make_row_3(root):
     for path in _g_paths(root, 'A3'):
         pd = PD.pathdata_from_string(path.get('d'))
         t = PD.Transform.rotate(120, 40, 40)
-        pd.transform(t, warning=False)
+        pd.transform(t, noexception=True)
         _append_path(D3, path, pd)
 
     E3 = _g(root, 'E3')
     for path in _g_paths(root, 'A3'):
         pd = PD.pathdata_from_string(path.get('d'))
         t = PD.Transform.rotate(180, 40, 40)
-        pd.transform(t, warning=False)
+        pd.transform(t, noexception=True)
         _append_path(E3, path, pd)
 
     F3 = _g(root, 'F3')
     for path in _g_paths(root, 'A1'):
         pd = PD.pathdata_from_string(path.get('d'))
         t = _toc * PD.Transform.skewX(20) * toc
-        pd.transform(t, warning=False)
+        pd.transform(t, noexception=True)
         _append_path(F3, path, pd)
         
 def _make_row_4(root):
@@ -138,21 +138,21 @@ def _make_row_4(root):
     for path in _g_paths(root, 'A3'):
         pd = PD.pathdata_from_string(path.get('d'))
         t = _toc * PD.Transform.scale(-1,1) * toc
-        pd.transform(t, warning=False)
+        pd.transform(t, noexception=True)
         _append_path(B4, path, pd)
 
     D4 = _g(root, 'D4')
     for path in _g_paths(root, 'A3'):
         pd = PD.pathdata_from_string(path.get('d'))
         t = _toc * PD.Transform.scale(.8,-.8) * toc
-        pd.transform(t, warning=False)
+        pd.transform(t, noexception=True)
         _append_path(D4, path, pd)
 
     F4 = _g(root, 'F4')
     for path in _g_paths(root, 'A5'):
         pd = PD.pathdata_from_string(path.get('d'))
         t = _toc * PD.Transform.skewY(20) * toc
-        pd.transform(t, warning=False)
+        pd.transform(t, noexception=True)
         _append_path(F4, path, pd)
         
 def _make_row_5(root):
@@ -169,14 +169,14 @@ def _make_row_5(root):
     for path in _g_paths(root, 'A5'):
         pd = PD.pathdata_from_string(path.get('d'))
         t = _toc * PD.Transform.rotate(-60) * toc
-        pd.transform(t, warning=False)
+        pd.transform(t, noexception=True)
         _append_path(D5, path, pd)
 
     E5 = _g(root, 'E5')
     for path in _g_paths(root, 'A5'):
         pd = PD.pathdata_from_string(path.get('d'))
         t = _toc * PD.Transform.rotate(-90) * toc
-        pd.transform(t, warning=False)
+        pd.transform(t, noexception=True)
         _append_path(E5, path, pd)
 
 def _make_row_6(root):
@@ -187,7 +187,7 @@ def _make_row_6(root):
     for path in _g_paths(root, 'A5'):
         pd = PD.pathdata_from_string(path.get('d'))
         t = _toc * PD.Transform.scale(-.8,-.8) * toc
-        pd.transform(t, warning=False)
+        pd.transform(t, noexception=True)
         _append_path(B6, path, pd)
 
     C6 = _g(root, 'C6')

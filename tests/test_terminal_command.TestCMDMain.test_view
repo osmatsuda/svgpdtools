@@ -1,0 +1,10 @@
+@1
+<path
+    fill="rgba(0,0,0,.2)" stroke="red" stroke-width="1" stroke-linejoin="round" stroke-linecap="round"
+    d="M 30,125
+       A 20 20 0 1 1 50,125
+       Z
+       M 50,125
+       A 25 15 25 1 1 30,125    24 12 345 1 0 50,125
+       M 55,105    25,105
+       M 40,105    40,120"/>

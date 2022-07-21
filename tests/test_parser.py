@@ -5,7 +5,6 @@ import svgpdtools.parser as P
 
 
 class TestParserCommand(unittest.TestCase):
-    #@unittest.skip('')
     def test_from_string_close(self):
         precision(0)
         src = 'm 10,20 10,-10 v 60 m -10,0 l 20,0 m 20,-60 c -10,0 -20,10 -20,30 0,20 10,30 20,30 C 60,70 70,60 70,40 c 0,-20 -10,-30 -20,-30 z m 0,10 v 40'

@@ -1,14 +1,25 @@
 from __future__ import annotations
 from collections import UserList
+from typing import Literal
 
-from .command import Command, Moveto, Lineto, Close, HorizontalAndVerticalLineto, EllipticalArc
+from .command import Command, Moveto, Lineto, Close, HorizontalAndVerticalLineto, EllipticalArc, \
+    set_force_repr_relative
 from .transform import Transform
+
+
+class PDTransformFailed(Exception):
+    def __init__(self, pd: PathData, message: str) -> None:
+        self.source = str(pd)
+        self.message = message
 
 
 class PathData(UserList[Command]):
     def __init__(self, cmds: list[Command] = []) -> None:
         self._absolutized = False
-        super().__init__(cmds)
+
+        super().__init__([])
+        for cmd in cmds:
+            self.append(cmd)
 
     def __repr__(self) -> str:
         r = ''
@@ -36,11 +47,14 @@ class PathData(UserList[Command]):
             
         super().append(cmd)
 
-    def transform(self, t: Transform, *, warning=True, collapse_elliptical_arc=False) -> None:
+    def transform(self, t: Transform, *,
+                  noexception=False,
+                  collapse_hv_lineto=False,
+                  collapse_elliptical_arc=False) -> None:
         if not self._absolutized:
             self.absolutize(called_internally=True)
 
-        if not warning:
+        if noexception:
             for i in range(len(self.data)):
                 cmd = self.data[i]
                 if isinstance(cmd, HorizontalAndVerticalLineto):
@@ -53,23 +67,33 @@ class PathData(UserList[Command]):
             transformed = []
             for i in range(len(self.data)):
                 cmd = self.data[i]
-                if (isinstance(cmd, HorizontalAndVerticalLineto) or
-                    isinstance(cmd, EllipticalArc)):
-                    warning = 'The pathdata includes `'
-                    if cmd.fn.lower() == 'h': warning += 'horizontal_lineto'
-                    elif cmd.fn.lower() == 'v': warning += 'vertical_lineto'
-                    elif cmd.fn.lower() == 'a': warning += 'elliptical_arc'
-                    warning += f'`, {cmd.fn}, command.'
-                    warning += '''
-Command `horizontal_lineto`, `vertical_lineto`, or `elliptical_arc` will be converted to `lineto` or `curveto` before transforming.
-If it's OK, you can continue to transform by the followings:
-    pathdata.transform(t, warning=False)
-      # `horizontal_lineto` and `vertical_lineto` are converted to `lineto`
-    pathdata.transform(t, warning=False, collapse_elliptical_arc=True)
-      # `elliptical_arc` is also converted to `curveto`'''
-                    raise Exception(warning)
+                failed = False
+                if isinstance(cmd, HorizontalAndVerticalLineto):
+                    if collapse_hv_lineto:
+                        transformed.append(cmd.converted_to_lineto().transformed(t))
+                    else:
+                        failed = True
+                elif isinstance(cmd, EllipticalArc):
+                    if collapse_elliptical_arc:
+                        transformed.append(cmd.converted_to_curves().transformed(t))
+                    else:
+                        failed = True
                 else:
                     transformed.append(cmd.transformed(t))
+
+                if failed:
+                    errmsg = f'The pathdata includes `{cmd.fn}` ({cmd.fn_description}) command.'
+                    errmsg += '''
+A command `horizontal_lineto`, `vertical_lineto`, or `elliptical_arc` may as well be converted to `lineto` or `curveto` before transforming.
+You can continue to transform by the followings:
+  - `horizontal/vertical_lineto` to `lineto`
+    pd.transform(t, noexception=True) or pd.transform(t, collapse_hv_lineto=True)
+  - `elliptical_arc` to `curveto`
+    pd.transform(t, collapse_elliptical_arc=True)
+  - `horizontal/vertical_lineto` and `elliptical_arc` to `lineto` and `curveto`
+    pd.transform(t, noexception=True, collapse_elliptical_arc=True) or
+    pd.transform(t, collapse_hv_lineto=True, collapse_elliptical_arc=True)'''
+                    raise PDTransformFailed(self, errmsg)
 
             self.data = transformed
 
@@ -149,3 +173,16 @@ def _collapse_implicit_lineto(moveto: Command) -> list[Command]:
     lineto.start_point = moveto.start_point
     moveto.data = moveto.data[0:1]
     return [moveto, lineto]
+
+
+class temporary_repr_relative:
+    def __init__(self, repr_relative: bool) -> None:
+        self.repr_relative = repr_relative
+        self._old_value: bool
+    
+    def __enter__(self) -> None:
+        self._old_value = set_force_repr_relative(self.repr_relative)
+
+    def __exit__(self, *exc) -> Literal[False]:
+        _ = set_force_repr_relative(self._old_value)
+        return False

@@ -1,15 +1,40 @@
-import unittest, pathlib, math, random
+import unittest, pathlib, math, random, string
 import xml.etree.ElementTree as ET
 
 import svgpdtools as PD
 
 
 class TestPDArc2Curves(unittest.TestCase):
-    @unittest.skip('')
+    @unittest.skip('test_pd_arc2curves.svg')
     def test_main(self):
         _make_test_arc2curves_src_svg()
         _make_test_arc2curves_svg()
 
+    @unittest.skip('test_pd_arc2curves_qad.svg')
+    def test_quadrant(self) -> None:
+        _make_qad_svg()
+        
+def _make_qad_svg():
+    ET.register_namespace('', 'http://www.w3.org/2000/svg')
+    curdir = pathlib.Path(__file__).parent
+    tree = ET.parse(curdir / 'test_pd_arc2curves_qad.svg')
+    svg = tree.getroot()
+    path_tmp = string.Template('<path fill="none" stroke="black" stroke-width=".5" d="$pd"/>')
+    
+    for path in svg.iterfind('./{*}path'):
+        clsnames = path.get('class')
+        if clsnames is None or 'arc' not in clsnames.split():
+            continue
+        pd = PD.pathdata_from_string(path.get('d'))
+        pd.absolutize()
+        for i in range(len(pd.data)):
+            cmd = pd.data[i]
+            if isinstance(cmd, PD.command.EllipticalArc):
+                pd.data[i] = cmd.converted_to_curves()
+        _path = ET.fromstring(path_tmp.substitute(pd=str(pd)))
+        svg.append(_path)
+
+    tree.write(curdir / 'images/test_pd_arc2curves_qad.svg', encoding='unicode')
 
 
 from .graphics import circle_from_3points, random_3points

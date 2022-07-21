@@ -1,11 +1,10 @@
 from dataclasses import dataclass, field
 from typing import Optional
-import math
+import math, os
 
 from .transform import Transform
 from .utils import rad2deg, deg2rad, number_repr
 from .graphics import Point, Circle, Line, line_through
-
 
 @dataclass
 class EllipticalArcItem:
@@ -91,7 +90,9 @@ class EllipticalArcItem:
         scale_to_circle = Transform.scale(1, self.rx / self.ry)
         to_beginning = Transform.translate(cp.x, cp.y)
         t = to_beginning * scale_to_circle * rotate_to_normal * to_O
-        curve_points = _split_arc(guide_circle, self.is_sweep, from_p.transformed(t), self.to_point.transformed(t))
+        from_p_td = from_p.transformed(t)
+        to_p_td = self.to_point.transformed(t)
+        curve_points = _split_arc(guide_circle, self.is_sweep, from_p_td, to_p_td)
 
         t = to_beginning * rotate_to_normal.inversed() * scale_to_circle.inversed() * to_O
         return [p.transformed(t) for p in curve_points]
@@ -165,7 +166,6 @@ def _split_arc(circle: Circle, is_sweep: bool, from_p: Point, to_p: Point) -> li
         cp1 = arc.from_point.between_to(quadratic_cp, u)
         cp2 = arc.to_point.between_to(quadratic_cp, u)
         ps += [cp1, cp2, arc.to_point]
-        
     return ps
 
 
@@ -180,15 +180,16 @@ def _split_arc_60_or_45(circle: Circle, is_sweep: bool, from_p: Point, to_p: Poi
     _45 = 45 * math.pi / 180
     _30 = 30 * math.pi / 180
     _15 = 15 * math.pi / 180
+
     start = circle.angle_from_x_axis(from_p)
     end = circle.angle_from_x_axis(to_p)
     theta = (end - start) % two_pi
     if not is_sweep:
         theta = two_pi - theta
 
-    segments_count = math.floor(theta / _60)
-    mod = theta % _60
-    if mod <= _30:
+    segments_count = int(theta / _60)
+    mod = max(0.0, theta - (_60 * segments_count))
+    if mod < _30:
         if segments_count == 0:
             segs = [theta]
         else:

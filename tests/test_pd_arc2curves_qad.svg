@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<svg version="1.1"
+     xmlns="http://www.w3.org/2000/svg"
+     viewBox="0 0 240 240">
+  <path
+      fill="none" stroke="black" stroke-width=".1"
+      d="M 40,0 V 240 M 100,0 V 240 M 160,0 V 240 M 220,0 V 240
+	 M 0,27.5 H 240 M 0,87.5 H 240 M 0,147.5 H 240 M 0,207.5 H 240"/>
+
+  <path
+      class="arc"
+      fill="none" stroke="rgba(0,0,0,.5)" stroke-width="2" stroke-linecap="round"
+      d="m 30,45 a 20 20 0 11 20,0"/>
+  <path
+      class="arc"
+      fill="none" stroke="rgba(255,0,0,.5)" stroke-width="2" stroke-linecap="round"
+      d="m 30,105 a 20 20 0 11 20,.1"/>
+  <path
+      class="arc"
+      fill="none" stroke="rgba(0,255,0,.5)" stroke-width="2" stroke-linecap="round"
+      d="M 30,165 A 20 20 0 11 50,165.01"/>
+  <path
+      class="arc"
+      fill="none" stroke="rgba(0,0,255,.5)" stroke-width="2" stroke-linecap="round"
+      d="M 30,225 A 20 20 0 11 50,225.0000001"/>
+
+  <path
+      class="arc"
+      fill="none" stroke="rgba(0,0,0,.5)" stroke-width="2" stroke-linecap="round"
+      d="m 90,45 a 20 20 0 11 20,0"/>
+  <path
+      class="arc"
+      fill="none" stroke="rgba(255,0,0,.5)" stroke-width="2" stroke-linecap="round"
+      d="m 90,105 a 20 20 0 11 20,0"/>
+  <path
+      class="arc"
+      fill="none" stroke="rgba(0,255,0,.5)" stroke-width="2" stroke-linecap="round"
+      d="M 90,165 A 20 20 0 11 110,165"/>
+  <path
+      class="arc"
+      fill="none" stroke="rgba(0,0,255,.5)" stroke-width="2" stroke-linecap="round"
+      d="M 90,225 A 20 20 0 11 110,225"/>
+</svg>

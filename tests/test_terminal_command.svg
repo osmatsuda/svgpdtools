@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<svg version="1.1"
+     xmlns="http://www.w3.org/2000/svg"
+     viewBox="0 0 160 240">
+  <path
+      fill="rgba(0,0,0,.2)" stroke="black" stroke-width="1" stroke-linejoin="round" stroke-linecap="round"
+      d="m 30,45 a 20 20 0 11 20,0 z m 20,0 a 25 15 25 11 -20,0 24 12 345 10 20,0 m 5,-20 -30,0 m 15,0 0,15"/>
+  <path
+      fill="rgba(0,0,0,.2)" stroke="red" stroke-width="1" stroke-linejoin="round" stroke-linecap="round"
+      d="m 30,125 a 20 20 0 11 20,0 z m 20,0 a 25 15 25 11 -20,0 24 12 345 10 20,0 m 5,-20 -30,0 m 15,0 0,15"/>
+  <path
+      fill="rgba(0,0,0,.2)" stroke="blue" stroke-width="1" stroke-linejoin="round" stroke-linecap="round"
+      d="m 30,205 a 20 20 0 11 20,0 z m 20,0 a 25 15 25 11 -20,0 24 12 345 10 20,0 m 5,-20 -30,0 m 15,0 0,15"/>
+</svg>

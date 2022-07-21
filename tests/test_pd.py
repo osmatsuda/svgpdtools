@@ -68,18 +68,18 @@ class TestPD(unittest.TestCase):
         PD.precision(0)
         # translate(0,160) rotate(-90)
         t = PD.Transform.translate(0, 160) * PD.Transform.rotate(-90)
-        self.pd1.transform(t, warning=False)
+        self.pd1.transform(t, noexception=True)
         self.assertEqual(str(self.pd1), 'm 20,150 -10,-10 l 60,0 m 0,10 l 0,-20 m -60,-20 c 0,10 10,20 30,20 20,0 30,-10 30,-20 C 70,100 60,90 40,90 c -20,0 -30,10 -30,20 z m 10,0 l 40,0')
 
     def test_transform_rotate60(self):
         self.maxDiff = None
         PD.precision(6)
         t = PD.Transform.rotate(60, 40, 40)
-        self.pd1.transform(t, warning=False)
+        self.pd1.transform(t, noexception=True)
         self.assertEqual(str(self.pd1), 'm 42.320508,4.019238 13.660254,3.660254 l -51.961524,30 m -5,-8.660254 l 10,17.320508 m 61.961524,-12.679492 c -5,-8.660254 -18.660254,-12.320508 -35.980762,-2.320508 -17.320508,10 -20.980762,23.660254 -15.980762,32.320508 C 24.019238,72.320508 37.679492,75.980762 55,65.980762 c 17.320508,-10 20.980762,-23.660254 15.980762,-32.320508 z m -8.660254,5 l -34.641016,20')
         self.pd2.transform(t)
         self.assertEqual(str(self.pd2), 'M 51.160254,39.330127 Q 46.160254,30.669873 37.5,35.669873 q -8.660254,5 -3.660254,13.660254 z m -12.320508,18.660254 q 5,8.660254 13.660254,3.660254 8.660254,-5 3.660254,-13.660254 z')
-        self.pd3.transform(t, warning=False)
+        self.pd3.transform(t, noexception=True)
         self.assertEqual(str(self.pd3), 'm 30.669873,33.839746 a 20 20 60 1 1 10,17.320508 z m 10,17.320508 a 25 15 85 1 1 -10,-17.320508 24 12 45 1 0 10,17.320508 m 19.820508,-5.669873 -15,-25.980762 m 7.5,12.990381 -12.990381,7.5')
 
 

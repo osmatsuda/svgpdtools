@@ -1,5 +1,5 @@
 from __future__ import annotations
-import argparse, pathlib, weakref, errno, sys, traceback
+import argparse, pathlib, weakref, errno, sys, traceback, re
 import xml.sax as SAX
 from xml.sax import make_parser
 from xml.sax.handler import ContentHandler
@@ -9,7 +9,9 @@ from dataclasses import dataclass, field
 from collections.abc import Iterator
 from typing import Any, Protocol, Optional, Union, TextIO
 
-from svgpdtools import PathData, Transform, parser, precision
+from svgpdtools import PathData, Transform, precision
+import svgpdtools.parser as myparser
+from svgpdtools.pathdata import temporary_repr_relative, PDTransformFailed
 from svgpdtools.command import Command, Moveto, Lineto, Curveto, HorizontalAndVerticalLineto,\
     EllipticalArc, EllipticalArcItem, Close
 from svgpdtools.utils import number_repr
@@ -18,19 +20,15 @@ from svgpdtools.utils import number_repr
 def _arg_parses() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         prog='svgpdtools',
-        usage='%(prog)s <command> [options]',
+        usage='%(prog)s <command> [options] [arguments]',
         formatter_class=argparse.RawDescriptionHelpFormatter,
         description='''\
 Available commands:
+  transform
   normalize
   view''',
         add_help=False,
-    )
-    parser.add_argument(
-        'command',
-        help=argparse.SUPPRESS,
-        nargs='?',
-        default=''
+        exit_on_error=False,
     )
 
     general = parser.add_argument_group('General Options')
@@ -52,19 +50,48 @@ Available commands:
         metavar='N',
         default=6
     )
+    general.add_argument(
+        '-i', '--index',
+        help='Set indexes of the paths which you want to manipulate. If not provided, all paths are objects.',
+        type=int,
+        metavar='N1 N2',
+        nargs='*',
+        default=[-1],
+    )
+    coord_repr_type = general.add_mutually_exclusive_group()
+    coord_repr_type.add_argument(
+        '-r', '--repr-relative',
+        action='store_true',
+        help='Use representing relative coordinates. Not allowed with “-a/--repr-absolute”.',
+    )
+    coord_repr_type.add_argument(
+        '-a', '--repr-absolute',
+        action='store_true',
+        help='Use representing absolute coordinates. Not allowed with “-r/--repr-relative”.',
+    )
+
+    transform = parser.add_argument_group(
+        'Command “transform”',
+        '''\
+Apply transform functions to the pathdata.
+usage: svgpdtools transform [options] [--] "<transform-list>"'''
+    )
+    transform.add_argument(
+        'transform',
+        type=str,
+        metavar='<transform-list>',
+        nargs='?',
+        default='',
+        help='Syntax of <transform-list> is the same as the SVG’s transform attribute.',
+    )
 
     normalize = parser.add_argument_group(
-        'Command ‘normalize’',
+        'Command “normalize”',
         '''\
 Convert pathdata to the following representations:
-- Use absolute coordinates
-- Merge continuous commands into one command
-- Split a implict lineto command into a moveto and a lineto'''
-    )
-    normalize.add_argument(
-        '--repr-relative',
-        action='store_true',
-        help='Use relative coordinates.'
+- Using absolute coordinates
+- Merging continuous commands into one command
+- Splitting a implict lineto command into a moveto and a lineto'''
     )
     normalize.add_argument(
         '--collapse-transform-attribute',
@@ -72,37 +99,53 @@ Convert pathdata to the following representations:
         help='If the path-element has a transform attribute, apply that transformation to the coordinates and remove that attribute.',
     )
     normalize.add_argument(
-        '--collapse-elliptical-arc',
-        action='store_true',
-        help='Convert a elliptical-arc command to a curveto command.',
-    )
-    normalize.add_argument(
-        '--collapse-hv-lineto',
-        action='store_true',
-        help='Convert a horizontal- or vertical-lineto command to a lineto command.',
-    )
-    normalize.add_argument(
         '--allow-implicit-lineto',
         action='store_true',
         help='Convert a moveto and following lineto commands into one moveto command.',
     )
 
+    common_to_trns_norm = parser.add_argument_group(
+        'Common to “transform” and “normalize”'
+    )
+    common_to_trns_norm.add_argument(
+        '--collapse-elliptical-arc',
+        action='store_true',
+        help='Convert a elliptical-arc command to a curveto command.',
+    )
+    common_to_trns_norm.add_argument(
+        '--collapse-hv-lineto',
+        action='store_true',
+        help='Convert a horizontal- or vertical-lineto command to a lineto command.',
+    )
+
     view = parser.add_argument_group(
-        'Command ‘view’',
+        'Command “view”',
         'Search path-elements from the input, and print each path-element in pretty format.',
     )
     
     return parser
 
 
-def main() -> None:
+def _head_tail(lst: list[str]) -> tuple[str, list[str]]:
+    return lst[0], lst[1:]
+
+def main(test_args: list[str]=[]) -> None:
     args_parser = _arg_parses()
+    show_help = True
     try:
-        args: Any = args_parser.parse_args(namespace=_Args())
-        show_help = True
-        if not args.help:
-            command(args)
+        if test_args:
             show_help = False
+            cmd_name, rest_args = _head_tail(test_args)
+        else:
+            cmd_name, rest_args = _head_tail(sys.argv[1:])
+            
+        args: Any = args_parser.parse_args(rest_args, namespace=_Args())
+            
+        if not args.help:
+            command(cmd_name, args)
+            show_help = False
+        elif not show_help:
+            show_help = True            
 
     except SAX.SAXReaderNotAvailable:
         print('No XML parsers available.\n')
@@ -113,14 +156,24 @@ def main() -> None:
     except _UnknownCommand as e:
         if e.name:
             print(f'Unknown command: {e.name}\n')
+
+    except argparse.ArgumentError as e:
+        if cmd_name == 'transform' and \
+           re.search(r'\b(translate|scale|matrix|rotate|skewX|skewY)\b', e.message):
+            print(f'ArgumentError: you can insert a pseudo-argument "--" before the <transform-list>\n')
+        else:
+            print(f'ArgumentError: {e}\n')
+
+    except PDTransformFailed as e:
+        print(e.message)
         
     except:
         traceback.print_exc()
+        show_help = False
 
     finally:
         if show_help:
             args_parser.print_help()
-
 
 
 class _UnknownCommand(Exception):
@@ -130,9 +183,11 @@ class _UnknownCommand(Exception):
 class _ArgsProto(Protocol):
     help: bool
     file: Optional[pathlib.Path]
-    command: str
     precision: int
+    index: list[int]
     repr_relative: bool
+    repr_absolute: bool
+    transform: str
     collapse_transform_attribute: bool
     collapse_elliptical_arc: bool
     collapse_hv_lineto: bool
@@ -161,7 +216,7 @@ class _ParserDelegate:
         return -1
 
 
-def command(args: _ArgsProto) -> None:
+def command(name: str, args: _ArgsProto) -> None:
     input: Union[TextIO, pathlib.Path]
     if args.file is not None:
         if not args.file.is_file():
@@ -170,19 +225,38 @@ def command(args: _ArgsProto) -> None:
     else:
         input = sys.stdin
 
+    if any([n < 0 for n in args.index]):
+        args.index = []
+        
     precision(args.precision)
-    name = args.command
+    
     handler: _Handler
     if name == 'view':
-        handler = PathViewHandler()
+        handler = PathViewHandler(
+            target_indexes = args.index,
+            repr_relative = args.repr_relative,
+            repr_absolute = args.repr_absolute,
+        )
 
     elif name == 'normalize':
         handler = PathNormalizeHandler(
+            target_indexes = args.index,
             repr_relative = args.repr_relative,
             collapse_hv_lineto = args.collapse_hv_lineto,
             collapse_elliptical_arc = args.collapse_elliptical_arc,
             collapse_transform_attribute = args.collapse_transform_attribute,
             allow_implicit_lineto = args.allow_implicit_lineto,
+        )
+        
+    elif name == 'transform':
+        transform = Transform.concat(myparser.transforms(args.transform.strip('\'"')))
+        handler = PathTransformHandler(
+            target_indexes = args.index,
+            transform = transform,
+            repr_relative = args.repr_relative,
+            repr_absolute = args.repr_absolute,
+            collapse_hv_lineto = args.collapse_hv_lineto,
+            collapse_elliptical_arc = args.collapse_elliptical_arc,
         )
 
     else:
@@ -192,8 +266,68 @@ def command(args: _ArgsProto) -> None:
     parser.parse(input)
 
 
+class PathTransformHandler(XMLGenerator):
+    def __init__(self, *,
+                 target_indexes: list[int],
+                 transform: Transform,
+                 repr_relative: bool,
+                 repr_absolute: bool,
+                 collapse_hv_lineto: bool,
+                 collapse_elliptical_arc: bool) -> None:
+        self.transform = transform
+        self.repr_relative = repr_relative
+        self.repr_absolute = repr_absolute
+        self.collapse_hv_lineto = collapse_hv_lineto
+        self.collapse_elliptical_arc = collapse_elliptical_arc
+        
+        self.delegate = None
+        
+        self.target_indexes = target_indexes
+        self.index = 0
+        super().__init__(sys.stdout, encoding='utf-8', short_empty_elements=True)
+        
+    def startElement(self, name: str, attrs: AttributesImpl) -> None:
+        if name != 'path':
+            super().startElement(name, attrs)
+            return
+
+        index = self.index
+        self.index += 1
+        if self.target_indexes and index not in self.target_indexes:
+            super().startElement(name, attrs)
+            return
+
+        _attrs = {}
+        transforms = [self.transform]
+        for k in attrs.keys():
+            if k == 'd':
+                pd = myparser.pathdata(attrs[k])
+            elif k == 'transform':
+                transforms.extend(myparser.transforms(attrs[k]))
+            else:
+                _attrs[k] = attrs[k]
+
+        pd.transform(
+            Transform.concat(transforms),
+            collapse_elliptical_arc=self.collapse_elliptical_arc,
+            collapse_hv_lineto=self.collapse_hv_lineto,
+        )
+
+        if self.repr_absolute:
+            pd.absolutize()
+        with temporary_repr_relative(self.repr_relative):
+            pd_str = str(pd)
+
+        _attrs['d'] = pd_str
+        super().startElement(name, AttributesImpl(_attrs))
+
+    def endDocument(self):
+        sys.stdout.write('\n')
+
+
 class PathNormalizeHandler(XMLGenerator):
     def __init__(self, *,
+                 target_indexes: list[int],
                  repr_relative: bool,
                  collapse_transform_attribute: bool,
                  collapse_elliptical_arc: bool,
@@ -204,7 +338,11 @@ class PathNormalizeHandler(XMLGenerator):
         self.collapse_hv_lineto = collapse_hv_lineto
         self.collapse_elliptical_arc = collapse_elliptical_arc
         self.allow_implicit_lineto = allow_implicit_lineto
+
         self.delegate = None
+
+        self.target_indexes = target_indexes
+        self.index = 0
         super().__init__(sys.stdout, encoding='utf-8', short_empty_elements=True)
         
     def startElement(self, name: str, attrs: AttributesImpl) -> None:
@@ -212,13 +350,19 @@ class PathNormalizeHandler(XMLGenerator):
             super().startElement(name, attrs)
             return
 
+        index = self.index
+        self.index += 1
+        if self.target_indexes and index not in self.target_indexes:
+            super().startElement(name, attrs)
+            return
+        
         _attrs = {}
         transforms = []
         for k in attrs.keys():
             if k == 'd':
-                pd = parser.pathdata(attrs[k])
+                pd = myparser.pathdata(attrs[k])
             elif k == 'transform':
-                transforms = parser.transforms(attrs[k])
+                transforms = myparser.transforms(attrs[k])
             else:
                 _attrs[k] = attrs[k]
 
@@ -226,8 +370,8 @@ class PathNormalizeHandler(XMLGenerator):
             if self.collapse_transform_attribute:
                 pd.transform(
                     Transform.concat(transforms),
-                    warning=False,
-                    collapse_elliptical_arc=self.collapse_elliptical_arc
+                    collapse_elliptical_arc=self.collapse_elliptical_arc,
+                    collapse_hv_lineto=self.collapse_hv_lineto,
                 )
             else:
                 _attrs['transform'] = ' '.join([str(t) for t in transforms])
@@ -244,14 +388,24 @@ class PathNormalizeHandler(XMLGenerator):
     def endDocument(self):
         sys.stdout.write('\n')
 
+
 class PathViewHandler(ContentHandler):
-    def __init__(self) -> None:
+    def __init__(self, *,
+                 target_indexes: list[int],
+                 repr_relative: bool,
+                 repr_absolute: bool,) -> None:
+        self.repr_relative = repr_relative
+        self.repr_absolute = repr_absolute
+        
         self.delegate = None
+
+        self.target_indexes = target_indexes
+        self.index = 0
 
         from mako.template import Template
         self.template = Template(text='''\
-%if line_number:
-@@ ${line_number}
+%if index:
+@${index}
 %endif
 <path
 %if attrs:
@@ -273,6 +427,11 @@ class PathViewHandler(ContentHandler):
         if name != 'path':
             return
 
+        index = self.index
+        self.index += 1
+        if self.target_indexes and index not in self.target_indexes:
+            return
+
         _attrs = {}
         others = []
         for k in attrs.keys():
@@ -289,6 +448,7 @@ class PathViewHandler(ContentHandler):
         if self.delegate and (ln := self.delegate.line_number) and ln > 0:
             _attrs['line_number'] = ln
 
+        _attrs['index'] = str(index)
         print(self.template.render(**_attrs))
 
     def _boxed_attrs(self, attrs: list[str]) -> str:
@@ -299,21 +459,28 @@ class PathViewHandler(ContentHandler):
 
     def _boxed_transforms(self, transform: str) -> str:
         box = _IndentedBox(padding=15, max_column=self.max_column)
-        for t in parser.transforms(transform):
+        for t in myparser.transforms(transform):
             box.append_words(str(t))
             box.feed_line()
         return box.leading_stripped
 
     def _boxed_pd(self, d: str) -> str:
         box = _IndentedBox(padding=7, max_column=self.max_column)
-        for fn, data in  _PathDataViewer(parser.pathdata(d)):
-            box.append_words(fn + ' ')
-            dbox = _IndentedBox(padding=9, max_column=self.max_column)
-            for w in data:
-                dbox.append_words('    ' + w)
-            box.append_box(dbox)
-            box.feed_line()
+        pd = myparser.pathdata(d)
+        if self.repr_absolute:
+            pd.absolutize()
+
+        with temporary_repr_relative(self.repr_relative):
+            for fn, data in  _PathDataViewer(pd):
+                box.append_words(fn + ' ')
+                dbox = _IndentedBox(padding=9, max_column=self.max_column)
+                for w in data:
+                    dbox.append_words('    ' + w)
+                box.append_box(dbox)
+                box.feed_line()
+                
         return box.leading_stripped
+
 
 _PathDataViewItem = tuple[str, list[str]]
 

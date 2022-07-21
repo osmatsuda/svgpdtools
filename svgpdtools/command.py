@@ -31,6 +31,8 @@ class Command(Protocol[CommandDataType]):
             called_internally: bool,
     ) -> Point: ...
     @property
+    def fn_description(self) -> str: ...
+    @property
     def end_point(self) -> Point: ...
 
 
@@ -42,6 +44,21 @@ class CommandBase(Generic[CommandDataType]):
         self.repr_relative = fn.islower()
         self._start_point: Optional[Point] = None
 
+    @property
+    def fn_description(self) -> str:
+        if self.fn.lower() == 'm': return 'moveto'
+        elif self.fn.lower() == 'z': return 'closepath'
+        elif self.fn.lower() == 'l': return 'lineto'
+        elif self.fn.lower() == 'h': return 'horizontal_lineto'
+        elif self.fn.lower() == 'v': return 'vertical_lineto'
+        elif self.fn.lower() == 'c': return 'curveto'
+        elif self.fn.lower() == 's': return 'smooth_curveto'
+        elif self.fn.lower() == 'q': return 'quadratic_curveto'
+        elif self.fn.lower() == 't': return 'smooth_quadratic_curveto'
+        elif self.fn.lower() == 'a': return 'elliptical_arc'
+
+        raise Exception(f'Unknown draw command: {self.fn}')
+        
     @property
     def start_point(self) -> Point:
         if self._start_point is not None:
@@ -73,7 +90,7 @@ class CommandBase(Generic[CommandDataType]):
 
 class SegmentalLineAndCurve(CommandBase[Point]):
     def __repr__(self) -> str:
-        force_relative = self.repr_relative and self.fn.isupper()
+        force_relative = _is_force_repr_relative(self)
         rpr = self.fn.lower() if force_relative else self.fn
         for p in (self._relatived_data() if force_relative else self.data):
             rpr += f' {p}'
@@ -146,7 +163,7 @@ class Curveto(SegmentalLineAndCurve):
     C/c: curveto                  (cp1, cp2, p)+
     S/s: smooth_curveto           (cp2, p)+
     Q/q: quadratic_curveto        (cp, p)+
-    T/q: smooth_quadratic_curveto (p)+
+    T/t: smooth_quadratic_curveto (p)+
     """
     pass
     
@@ -161,7 +178,7 @@ class Moveto(CommandBase[Point]):
         super().__init__(fn, data)
         
     def __repr__(self) -> str:
-        force_relative = self.repr_relative and self.fn.isupper()
+        force_relative = _is_force_repr_relative(self)
         rpr = self.fn.lower() if force_relative else self.fn
 
         start = 0
@@ -262,7 +279,7 @@ class HorizontalAndVerticalLineto(CommandBase[float]):
     V/v: vertical_lineto   (num)+
     """
     def __repr__(self) -> str:
-        if self.repr_relative and self.fn.isupper():
+        if _is_force_repr_relative(self):
             rpr = self.fn.lower()
             data = self._relatived_data()
         else:
@@ -358,7 +375,7 @@ class HorizontalAndVerticalLineto(CommandBase[float]):
 
 class EllipticalArc(CommandBase[EllipticalArcItem]):
     def __repr__(self) -> str:
-        force_relative = self.repr_relative and self.fn.isupper()
+        force_relative = _is_force_repr_relative(self)
         rpr = 'a' if force_relative else self.fn
         for a in self.data:
             rpr += f' {a.repr(self.fn.isupper() and not force_relative)}'
@@ -417,7 +434,7 @@ class Close(CommandBase[Point]):
         super().__init__(fn, [])
 
     def __repr__(self) -> str:
-        if self.repr_relative and self.fn.isupper():
+        if _is_force_repr_relative(self):
             return self.fn.lower()
         return self.fn
 
@@ -450,3 +467,14 @@ class Close(CommandBase[Point]):
         self.fn = 'Z'
         return self.end_point
     
+
+
+_force_repr_relative = False
+def set_force_repr_relative(val: bool) -> bool:
+    global _force_repr_relative
+    old_value = _force_repr_relative
+    _force_repr_relative = val
+    return old_value
+
+def _is_force_repr_relative(cmd: Command) -> bool:
+    return _force_repr_relative or (cmd.repr_relative and cmd.fn.isupper())
