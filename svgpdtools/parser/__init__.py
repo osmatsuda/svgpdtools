@@ -9,6 +9,10 @@ from svgpdtools.graphics import Point
 
 
 def pathdata(d: str) -> PathData:
+    """
+    Convert a path data string to a `svgpdtools.PathData` object. A path data string
+    The `d` argument be a value of the `d` property of the SVG-path element.
+    """
     pd = PathData()
     buff = ''
     for c in d:
@@ -28,6 +32,11 @@ def pathdata(d: str) -> PathData:
 
 
 def transforms(src: str) -> list[Transform]:
+    """
+    Convert a string representation of SVG transfom functions to a list of
+    `svgpdtools.Transform` objects.
+    The syntax of transform functions are the same as the SVG `transform` attribute.
+    """
     funs = []
     rest = _consume_wsp(src)
     while rest:
@@ -242,7 +251,7 @@ def _consume_number(src: str) -> tuple[str, str]:
 def _consume_wsp(src: str) -> str:
     i = 0
     for c in src:
-        if ord(c) in (0x9, 0xA, 0xC, 0xD, 0x20):
+        if ord(c) in (0x9, 0xA, 0xB, 0xC, 0xD, 0x20):
             i+=1
         else:
             break
@@ -251,7 +260,7 @@ def _consume_wsp(src: str) -> str:
 def _consume_comma_wsp(src: str) -> str:
     i = 0
     for c in src:
-        if ord(c) in (0x9, 0xA, 0xC, 0xD, 0x20, 0x2c):
+        if ord(c) in (0x9, 0xA, 0xB, 0xC, 0xD, 0x20, 0x2c):
             i+=1
         else:
             break

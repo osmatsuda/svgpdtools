@@ -1,10 +1,9 @@
 from __future__ import annotations
 from typing import Protocol, TypeVar, Generic, Optional
-from collections import UserList
 from dataclasses import dataclass, field, asdict
 import math
 
-from .graphics import Point
+from .graphics import Point, TupledPoint
 from .transform import Transform
 from .ellipticalarc import EllipticalArcItem
 from .utils import number_repr, rad2deg, deg2rad
@@ -30,6 +29,7 @@ class Command(Protocol[CommandDataType]):
             *,
             called_internally: bool,
     ) -> Point: ...
+    def segmented_points(self) -> list[TupledPoint]: ...
     @property
     def fn_description(self) -> str: ...
     @property
@@ -86,6 +86,9 @@ class CommandBase(Generic[CommandDataType]):
         me.transform(t)
         return me
 
+    def segmented_points(self) -> list[TupledPoint]:
+        raise NotImplementedError
+
         
 
 class SegmentalLineAndCurve(CommandBase[Point]):
@@ -102,11 +105,7 @@ class SegmentalLineAndCurve(CommandBase[Point]):
             return self.data
 
         cur = self.start_point.clone()
-        step = 1
-        if self.fn == 'C':
-            step = 3
-        elif self.fn in 'SQ':
-            step = 2
+        _, step = _data_steps(self.fn)
 
         data = []
         for i in range(0, len(self.data), step):
@@ -121,11 +120,7 @@ class SegmentalLineAndCurve(CommandBase[Point]):
         if self.fn.isupper(): return self.data[-1]
 
         cur = self.start_point.clone()
-        step = 1
-        if self.fn == 'c':
-            step = 3
-        elif self.fn in 'sq':
-            step = 2
+        _, step = _data_steps(self.fn)
 
         for i in range(step-1, len(self.data), step):
             cur += self.data[i]
@@ -142,11 +137,7 @@ class SegmentalLineAndCurve(CommandBase[Point]):
         if self.fn.isupper(): return self.end_point
 
         cur = prev_point.clone()
-        step = 1
-        if self.fn.lower() == 'c':
-            step = 3
-        elif self.fn.lower() in 'sq':
-            step = 2
+        _, step = _data_steps(self.fn)
 
         for i in range(0, len(self.data), step):
             for j in range(step):
@@ -155,6 +146,26 @@ class SegmentalLineAndCurve(CommandBase[Point]):
 
         self.fn = self.fn.upper()
         return self.end_point
+
+    def segmented_points(self) -> list[TupledPoint]:
+        cur = self.start_point.clone()
+        ps = [tuple(cur)]
+        start, step = _data_steps(self.fn)
+        is_abs = self.fn.isupper()
+        
+        for i in range(start, len(self.data), step):
+            p = self.data[i] if is_abs else self.data[i] + cur
+            ps.append(tuple(p))
+            cur = p
+        return ps
+
+def _data_steps(fn) -> tuple[int, int]:
+    fn = fn.lower()
+    if fn == 'c':
+        return 2, 3
+    elif fn in 'sq':
+        return 1, 2
+    return 0, 1
             
 
     
@@ -262,6 +273,18 @@ class Moveto(CommandBase[Point]):
 
         self.fn = self.fn.upper()
         return self.end_point
+
+    def segmented_points(self) -> list[TupledPoint]:
+        cur = self.start_point.clone()
+
+        ps = [tuple(cur)] if self.is_first_command else []
+        start = 1 if self.is_first_command else 0
+        is_abs = self.fn.isupper();
+        for i in range(start, len(self.data)):
+            p = self.data[i] if is_abs else self.data[i] + cur
+            ps.append(tuple(p))
+            cur = p
+        return ps
 
 
     
@@ -371,6 +394,9 @@ class HorizontalAndVerticalLineto(CommandBase[float]):
         cmd.repr_relative = self.repr_relative
         return cmd
 
+    def segmented_points(self) -> list[TupledPoint]:
+        return [tuple(self.start_point), tuple(self.end_point)]
+
 
 
 class EllipticalArc(CommandBase[EllipticalArcItem]):
@@ -466,7 +492,9 @@ class Close(CommandBase[Point]):
         self.repr_relative = called_internally and self.repr_relative
         self.fn = 'Z'
         return self.end_point
-    
+
+    def segmented_points(self) -> list[TupledPoint]:
+        return [tuple(self.end_point)]    
 
 
 _force_repr_relative = False

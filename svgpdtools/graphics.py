@@ -1,14 +1,17 @@
 from __future__ import annotations
 from dataclasses import dataclass, field
-from typing import Optional
+from collections.abc import Iterable, Iterator
+from typing import Optional, NewType
 import math
 
 from .utils import number_repr
 from .transform import Transform
 
 
+TupledPoint = tuple[float, ...]
+
 @dataclass
-class Point:
+class Point(Iterable[float]):
     x: float = 0
     y: float = 0
     
@@ -29,6 +32,9 @@ class Point:
             return math.isclose(self.x, other.x) and math.isclose(self.y, other.y)
         return False
 
+    def __iter__(self) -> Iterator[float]:
+        return iter([self.x, self.y])
+    
     def distance_to(self, other: Point) -> float:
         dx, dy = other.x - self.x, other.y - self.y
         return math.sqrt(dx*dx + dy*dy)
@@ -47,7 +53,6 @@ class Point:
     
     def clone(self) -> Point:
         return Point(self.x, self.y)
-
 
 
 

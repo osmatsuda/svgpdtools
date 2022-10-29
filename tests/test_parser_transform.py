@@ -1,6 +1,7 @@
 import unittest
 
-from svgpdtools import Point, Transform, precision, pathdata_from_string, transform_from_string
+from svgpdtools import Transform, precision, pathdata_from_string, transform_from_string
+from svgpdtools.graphics import Point
 import svgpdtools.parser as P
 
 

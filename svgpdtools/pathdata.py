@@ -5,6 +5,7 @@ from typing import Literal
 from .command import Command, Moveto, Lineto, Close, HorizontalAndVerticalLineto, EllipticalArc, \
     set_force_repr_relative
 from .transform import Transform
+from .graphics import TupledPoint
 
 
 class PDTransformFailed(Exception):
@@ -12,8 +13,11 @@ class PDTransformFailed(Exception):
         self.source = str(pd)
         self.message = message
 
-
+# ISSUE: it may be bad idea to use UserList
 class PathData(UserList[Command]):
+    """
+    UserList of `Command` objects.
+    """
     def __init__(self, cmds: list[Command] = []) -> None:
         self._absolutized = False
 
@@ -23,17 +27,17 @@ class PathData(UserList[Command]):
 
     def __repr__(self) -> str:
         r = ''
-        for cmd in self.data:
+        for cmd in self:
             r += f' {cmd}'
         return r[1:]
 
     def append(self, cmd: Command) -> None:
         if self.data:
-            cmd.start_point = self.data[-1].end_point.clone()
+            cmd.start_point = self[-1].end_point.clone()
 
             if isinstance(cmd, Close):
-                for i in range(len(self.data), 0, -1):
-                    prev_cmd = self.data[i-1]
+                for i in range(len(self), 0, -1):
+                    prev_cmd = self[i-1]
                     if isinstance(prev_cmd, Moveto):
                         cmd.end_point = prev_cmd.moveto_point.clone()
                         break
@@ -56,17 +60,17 @@ class PathData(UserList[Command]):
 
         if noexception:
             for i in range(len(self.data)):
-                cmd = self.data[i]
+                cmd = self[i]
                 if isinstance(cmd, HorizontalAndVerticalLineto):
-                    self.data[i] = cmd.converted_to_lineto()
+                    self[i] = cmd.converted_to_lineto()
                 elif isinstance(cmd, EllipticalArc) and collapse_elliptical_arc:
-                    self.data[i] = cmd.converted_to_curves()
+                    self[i] = cmd.converted_to_curves()
 
-                self.data[i].transform(t)
+                self[i].transform(t)
         else:
             transformed = []
-            for i in range(len(self.data)):
-                cmd = self.data[i]
+            for i in range(len(self)):
+                cmd = self[i]
                 failed = False
                 if isinstance(cmd, HorizontalAndVerticalLineto):
                     if collapse_hv_lineto:
@@ -84,15 +88,18 @@ class PathData(UserList[Command]):
                 if failed:
                     errmsg = f'The pathdata includes `{cmd.fn}` ({cmd.fn_description}) command.'
                     errmsg += '''
-A command `horizontal_lineto`, `vertical_lineto`, or `elliptical_arc` may as well be converted to `lineto` or `curveto` before transforming.
+A command `horizontal_lineto`, `vertical_lineto`, or `elliptical_arc` may as
+well be converted to `lineto` or `curveto` before transforming.
 You can continue to transform by the followings:
   - `horizontal/vertical_lineto` to `lineto`
-    pd.transform(t, noexception=True) or pd.transform(t, collapse_hv_lineto=True)
+    - pd.transform(t, noexception=True)
+      - If there are `elliptical_arc`s, they are transformed as-is.
+    - pd.transform(t, collapse_hv_lineto=True)
   - `elliptical_arc` to `curveto`
-    pd.transform(t, collapse_elliptical_arc=True)
+    - pd.transform(t, collapse_elliptical_arc=True)
   - `horizontal/vertical_lineto` and `elliptical_arc` to `lineto` and `curveto`
-    pd.transform(t, noexception=True, collapse_elliptical_arc=True) or
-    pd.transform(t, collapse_hv_lineto=True, collapse_elliptical_arc=True)'''
+    - pd.transform(t, noexception=True, collapse_elliptical_arc=True)
+    - pd.transform(t, collapse_hv_lineto=True, collapse_elliptical_arc=True)'''
                     raise PDTransformFailed(self, errmsg)
 
             self.data = transformed
@@ -102,8 +109,8 @@ You can continue to transform by the followings:
 
         if not self.data: return
 
-        curr_p = self.data[0].start_point
-        for cmd in self.data:
+        curr_p = self[0].start_point
+        for cmd in self:
             curr_p = cmd.absolutize(curr_p, called_internally=called_internally)
 
     def normalize(self, *,
@@ -119,13 +126,13 @@ You can continue to transform by the followings:
         if not self.data: return
 
         if not allow_implicit_lineto:
-            cmds = _collapse_implicit_lineto(self.data[0])
+            cmds = _collapse_implicit_lineto(self[0])
         else:
-            cmds = [self.data[0]]
+            cmds = [self[0]]
 
-        for i in range(1, len(self.data)):
+        for i in range(1, len(self)):
             prev_cmd = cmds[-1]
-            cmd = self.data[i]
+            cmd = self[i]
             if collapse_elliptical_arc and isinstance(cmd, EllipticalArc):
                 cmd = cmd.converted_to_curves()
 
@@ -161,6 +168,22 @@ You can continue to transform by the followings:
             cmd.repr_relative = repr_relative
 
         self.data = cmds
+
+    def segmented_points(self) -> list[TupledPoint]:
+        """
+        Returns list of Points. Each Point is segmentation point by a command,
+        either explicit or implicit, and is shown as tuple `(x, y)`.
+        All coordinates are absolute.
+        """
+        ps = self[0].segmented_points()
+        last_cmd = Moveto
+        for cmd in self.data[1:]:
+            if isinstance(cmd, Moveto) or isinstance(cmd, Close) or isinstance(last_cmd, Moveto):
+                ps.extend(cmd.segmented_points())
+            else:
+                ps.extend(cmd.segmented_points()[1:])
+            last_cmd = type(cmd)
+        return ps
 
 
 def _collapse_implicit_lineto(moveto: Command) -> list[Command]:

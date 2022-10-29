@@ -1,5 +1,4 @@
 from typing import Protocol
-from dataclasses import dataclass
 import math
 
 
@@ -12,26 +11,33 @@ DEFAULT_PRECISION = 6
 _precision_ = DEFAULT_PRECISION
 
 def precision(value: int) -> None:
+    assert value >= 0
     global _precision_
     _precision_ = value
     
 
 
 def number_repr(num: float) -> str:
+    """
+    Convert a float number to a string representation with a precision setting.
+    The precision is set by `precision(int)` function.
+    When formatting, this function uses the fixed-point notation and the precision.
+    Then trimming trailing zeros after the decimal point.
+    """
     if _precision_ == 0:
         return str(round(num))
 
     s = str(num)
-    dp = -1
+    pos = -1
     for c in s:
-        if dp > -1 and c.isnumeric():
-            dp += 1
+        if pos > -1 and c.isnumeric():
+            pos += 1
             continue
         
         if c == '.':
-            dp = 0
+            pos = 0
         
-    if dp >= _precision_:
+    if pos >= _precision_:
         s = (f'{{:.{_precision_}f}}').format(num)
         
     if s.find('.') > -1:

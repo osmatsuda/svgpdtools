@@ -2,6 +2,7 @@ import unittest, pathlib, math
 import xml.etree.ElementTree as ET
 
 import svgpdtools as PD
+from svgpdtools.graphics import Point
 
 
 class TestPDTransforms(unittest.TestCase):
@@ -11,7 +12,7 @@ class TestPDTransforms(unittest.TestCase):
         self.assertTrue(is_identity(t*t_inv))
         self.assertTrue(is_identity(t_inv*t))
 
-        p = PD.Point(100, 200)
+        p = Point(100, 200)
         p_ = p.transformed(t).transformed(t_inv)
         self.assertEqual(p, p_)
         

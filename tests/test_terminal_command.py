@@ -73,21 +73,27 @@ class TestCMDMainArgParseError(unittest.TestCase):
         
     def test_arg_errors(self):
         err_str = 'ArgumentError: argument -p/--precision: expected one argument\n\n'
-        with contextlib.redirect_stdout(self.stream):
-            CMD.main('view -i -p'.split())
-        self.assertEqual(self.stream.getvalue(), err_str)
+        try:
+            with contextlib.redirect_stderr(self.stream):
+                CMD.main('view -i -p'.split())
+        except:
+            self.assertEqual(self.stream.getvalue(), err_str)
 
     def test_arg_errors_repr_type(self):
         err_str = 'ArgumentError: argument -r/--repr-relative: not allowed with argument -a/--repr-absolute\n\n'
-        with contextlib.redirect_stdout(self.stream):
-            CMD.main('view -a -r'.split())
-        self.assertEqual(self.stream.getvalue(), err_str)
+        try:
+            with contextlib.redirect_stderr(self.stream):
+                CMD.main('view -a -r'.split())
+        except:
+            self.assertEqual(self.stream.getvalue(), err_str)
 
     def test_arg_errors_transform(self):
         err_str = 'ArgumentError: you can insert a pseudo-argument "--" before the <transform-list>\n\n'
-        with contextlib.redirect_stdout(self.stream):
-            CMD.main('transform -i 1 2'.split() + ['"scale(-1) translate(10)"'])
-        self.assertEqual(self.stream.getvalue(), err_str)
+        try:
+            with contextlib.redirect_stderr(self.stream):
+                CMD.main('transform -i 1 2'.split() + ['"scale(-1) translate(10)"'])
+        except:
+            self.assertEqual(self.stream.getvalue(), err_str)
 
     
 class TestPathView(unittest.TestCase):

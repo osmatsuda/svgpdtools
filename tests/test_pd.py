@@ -2,6 +2,43 @@ import unittest
 import svgpdtools as PD
 
 
+class TestPDSegPoints(unittest.TestCase):
+    def test_cmd_M(self):
+        pd = PD.pathdata_from_string('M 10,10 20,10 20,20 10,20')
+        expected = [(10.,10.), (20.,10.), (20.,20.), (10.,20.)]
+        self.assertEqual(pd.segmented_points(), expected)
+        
+    def test_cmd_M2(self):
+        pd = PD.pathdata_from_string('M 10,10 20,10 M 20,20 10,20')
+        expected = [(10.,10.), (20.,10.), (20.,20.), (10.,20.)]
+        self.assertEqual(pd.segmented_points(), expected)
+        
+    def test_cmd_ML(self):
+        pd = PD.pathdata_from_string('M 10,10 L 20,10 20,20 10,20')
+        expected = [(10.,10.), (20.,10.), (20.,20.), (10.,20.)]
+        self.assertEqual(pd.segmented_points(), expected)
+
+    def test_cmd_MLV(self):
+        pd = PD.pathdata_from_string('M 10,10 H 20 V 20 L 10,20')
+        expected = [(10.,10.), (20.,10.), (20.,20.), (10.,20.)]
+        self.assertEqual(pd.segmented_points(), expected)
+
+    def test_cmd_MZ(self):
+        pd = PD.pathdata_from_string('M 10,10 20,10 20,20 10,20 Z')
+        expected = [(10.,10.), (20.,10.), (20.,20.), (10.,20.), (10.,10.)]
+        self.assertEqual(pd.segmented_points(), expected)
+
+    def test_cmd_MZ2(self):
+        pd = PD.pathdata_from_string('M 10,10 20,10 20,20 Z M 20,20 10,20')
+        expected = [(10.,10.), (20.,10.), (20.,20.), (10.,10.), (20.,20.), (10.,20.)]
+        self.assertEqual(pd.segmented_points(), expected)
+
+    def test_cmd_C(self):
+        pd = PD.pathdata_from_string('M 50,10 C 40,10 30,20 30,40 30,60 40,70 50,70')
+        expected = [(50.,10.), (30.,40.), (50.,70.)]
+        self.assertEqual(pd.segmented_points(), expected)
+
+
 class TestPD(unittest.TestCase):
     def setUp(self):
         self.pd1 = PD.pathdata_from_string('m 10,20 10,-10 v 60 m -10,0 l 20,0 m 20,-60 c -10,0 -20,10 -20,30 0,20 10,30 20,30 C 60,70 70,60 70,40 c 0,-20 -10,-30 -20,-30 z m 0,10 v 40')
@@ -48,6 +85,16 @@ class TestPD(unittest.TestCase):
         self.assertEqual(str(self.pd1), 'M 10,20 20,10 V 70 M 10,70 L 30,70 M 50,10 C 40,10 30,20 30,40 30,60 40,70 50,70 C 60,70 70,60 70,40 C 70,20 60,10 50,10 Z M 50,20 V 60')
         self.pd3.absolutize()
         self.assertEqual(str(self.pd3), 'M 30,45 A 20 20 0 1 1 50,45 Z M 50,45 A 25 15 25 1 1 30,45 24 12 345 1 0 50,45 M 55,25 25,25 M 40,25 40,40')
+
+    def test_segmented_points_count(self):
+        sp = self.pd1.segmented_points()
+        expected = [(10.,20.), (20.,10.), (20.,70.), (10.,70.), (30.,70.), (50.,10.), (30.,40.), (50.,70.), (70.,40.), (50.,10.), (50.,10.), (50.,20.), (50.,60.)]
+        self.assertEqual(len(sp), len(expected))
+
+    def test_segmented_points(self):
+        sp = self.pd1.segmented_points()
+        expected = [(10.,20.), (20.,10.), (20.,70.), (10.,70.), (30.,70.), (50.,10.), (30.,40.), (50.,70.), (70.,40.), (50.,10.), (50.,10.), (50.,20.), (50.,60.)]
+        self.assertEqual(sp, expected)
 
     def test_transform_moveto_abs(self):
         PD.precision(0)

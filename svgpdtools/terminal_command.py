@@ -120,18 +120,23 @@ Convert pathdata to the following representations:
 
     view = parser.add_argument_group(
         'Command “view”',
-        'Search path-elements from the input, and print each path-element in pretty format.',
+        'Search path-elements from the input, and print each path-element nicely formatted.',
     )
     
     return parser
 
 
 def _head_tail(lst: list[str]) -> tuple[str, list[str]]:
+    if len(lst) == 0:
+        return '', []
+    if lst[0].startswith('-'):
+        return '', lst
     return lst[0], lst[1:]
 
 def main(test_args: list[str]=[]) -> None:
     args_parser = _arg_parses()
     show_help = True
+    exit_code = 2
     try:
         if test_args:
             show_help = False
@@ -144,28 +149,33 @@ def main(test_args: list[str]=[]) -> None:
         if not args.help:
             command(cmd_name, args)
             show_help = False
+            exit_code = 0
         elif not show_help:
-            show_help = True            
+            show_help = True
+            exit_code = 0
 
     except SAX.SAXReaderNotAvailable:
-        print('No XML parsers available.\n')
+        print('No XML parsers available.\n', file=sys.stderr)
 
     except FileNotFoundError as e:
-        print(f'File not found: {e.filename}\n')
+        print(f'File not found: {e.filename}\n', file=sys.stderr)
 
     except _UnknownCommand as e:
         if e.name:
-            print(f'Unknown command: {e.name}\n')
+            print(f'Unknown command: {e.name}\n', file=sys.stderr)
+        else:
+            print('Command name required\n', file=sys.stderr)
 
     except argparse.ArgumentError as e:
         if cmd_name == 'transform' and \
            re.search(r'\b(translate|scale|matrix|rotate|skewX|skewY)\b', e.message):
-            print(f'ArgumentError: you can insert a pseudo-argument "--" before the <transform-list>\n')
+            print(f'ArgumentError: you can insert a pseudo-argument "--" before the <transform-list>\n', file=sys.stderr)
         else:
-            print(f'ArgumentError: {e}\n')
+            print(f'ArgumentError: {e}\n', file=sys.stderr)
+        exit_code = 1
 
     except PDTransformFailed as e:
-        print(e.message)
+        print(e.message, file=sys.stderr)
         
     except:
         traceback.print_exc()
@@ -173,7 +183,12 @@ def main(test_args: list[str]=[]) -> None:
 
     finally:
         if show_help:
-            args_parser.print_help()
+            if exit_code > 0:
+                args_parser.print_help(sys.stderr)
+            else:
+                args_parser.print_help()
+        if exit_code > 0:
+            sys.exit(exit_code)
 
 
 class _UnknownCommand(Exception):
@@ -496,7 +511,7 @@ class _PathDataViewer(Iterator[_PathDataViewItem]):
         self._i += 1
         if self._i >= len(self.pd):
             raise StopIteration
-        cmd = self.pd.data[self._i]
+        cmd = self.pd[self._i]
         return _cmd_data_views(cmd)
 
 
