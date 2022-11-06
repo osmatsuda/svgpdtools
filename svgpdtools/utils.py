@@ -19,10 +19,10 @@ def precision(value: int) -> None:
 
 def number_repr(num: float) -> str:
     """
-    Convert a float number to a string representation with a precision setting.
-    The precision is set by `precision(int)` function.
-    When formatting, this function uses the fixed-point notation and the precision.
-    Then trimming trailing zeros after the decimal point.
+    Convert a float number to a string representation with a precision
+    setting. The precision is set by `precision(int)` function. When
+    formatting, this function uses the fixed-point notation and the
+    precision. Then trimming trailing zeros after the decimal point.
     """
     if _precision_ == 0:
         return str(round(num))

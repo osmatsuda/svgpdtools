@@ -10,8 +10,8 @@ from svgpdtools.graphics import Point
 
 def pathdata(d: str) -> PathData:
     """
-    Convert a path data string to a `svgpdtools.PathData` object. A path data string
-    The `d` argument be a value of the `d` property of the SVG-path element.
+    Convert a path data string to a `svgpdtools.PathData` object. A path
+    data string is a value of the `d` property of the SVG-path element.
     """
     pd = PathData()
     buff = ''
@@ -35,7 +35,8 @@ def transforms(src: str) -> list[Transform]:
     """
     Convert a string representation of SVG transfom functions to a list of
     `svgpdtools.Transform` objects.
-    The syntax of transform functions are the same as the SVG `transform` attribute.
+    The syntax of transform functions are the same as the SVG `transform`
+    attribute.
     """
     funs = []
     rest = _consume_wsp(src)

@@ -13,10 +13,15 @@ class PDTransformFailed(Exception):
         self.source = str(pd)
         self.message = message
 
-# ISSUE: it may be bad idea to use UserList
+# ISSUES:
+#   - it may be bad idea to use UserList
+#   - should be immutable data
 class PathData(UserList[Command]):
     """
-    UserList of `Command` objects.
+    UserList of `svgpdtools.Command` objects.
+    This class has some methods which are major task of the `svgpdtools`.
+    `transform`, `absolutize`, and `normalize`, those methods are
+    destructive operations.
     """
     def __init__(self, cmds: list[Command] = []) -> None:
         self._absolutized = False
@@ -55,6 +60,27 @@ class PathData(UserList[Command]):
                   noexception=False,
                   collapse_hv_lineto=False,
                   collapse_elliptical_arc=False) -> None:
+        """
+        Each point of a pathdata is transformed into another point by a
+        `svgpdtools.Transform` object.
+
+        It is almost the same manner of the `transform` attribute of the
+        SVG. But when the transform contains rotation or skew commands,
+        `horizontal/vertical lineto (H/h, V/v)` and `elliptical arc (A/a)`
+        command drawings may not be transformed to the same drawings of the
+        SVG graphical element with a transform attribute. So this method can
+        convert those commands into `lineto (L/l)` and `curveto (C/c)`
+        commands.
+        By default, raises PDTransformFailed exception when meets that case.
+
+        :param noexception: if True, convert H/h and V/v commands into
+            L/l commands. But A/a commands are changed only their coords.
+            (default False)
+        :param collapse_hv_lineto: if True, convert only H/h and V/v
+            commands into L/l commands. (default False)
+        :param collapse_elliptical_arc: if True, convert only A/a commands
+            into C/c commands. (default False)
+        """
         if not self._absolutized:
             self.absolutize(called_internally=True)
 
@@ -88,16 +114,18 @@ class PathData(UserList[Command]):
                 if failed:
                     errmsg = f'The pathdata includes `{cmd.fn}` ({cmd.fn_description}) command.'
                     errmsg += '''
-A command `horizontal_lineto`, `vertical_lineto`, or `elliptical_arc` may as
-well be converted to `lineto` or `curveto` before transforming.
+A command `horizontal_lineto (H/h)`, `vertical_lineto (V/v)`, or
+`elliptical_arc (A/a)` may as well be converted to `lineto (L/l)` or
+`curveto (C/c)` before transforming.
 You can continue to transform by the followings:
-  - `horizontal/vertical_lineto` to `lineto`
+  - Convert H/h V/v into L/l:
     - pd.transform(t, noexception=True)
-      - If there are `elliptical_arc`s, they are transformed as-is.
+      - If there are A/a commands, they are transformed as-is.
     - pd.transform(t, collapse_hv_lineto=True)
-  - `elliptical_arc` to `curveto`
+      - If there are A/a commands, raise PDTransformFailed.
+  - Convert A/a into C/c:
     - pd.transform(t, collapse_elliptical_arc=True)
-  - `horizontal/vertical_lineto` and `elliptical_arc` to `lineto` and `curveto`
+  - Convert H/h, V/v into L/l and A/a into C/c:
     - pd.transform(t, noexception=True, collapse_elliptical_arc=True)
     - pd.transform(t, collapse_hv_lineto=True, collapse_elliptical_arc=True)'''
                     raise PDTransformFailed(self, errmsg)
@@ -105,6 +133,9 @@ You can continue to transform by the followings:
             self.data = transformed
 
     def absolutize(self, *, called_internally=False) -> None:
+        """
+        Converts relative coordinates into absolute coordinates.
+        """
         self._absolutized = True
 
         if not self.data: return
@@ -119,6 +150,22 @@ You can continue to transform by the followings:
                   collapse_elliptical_arc=False,
                   allow_implicit_lineto=False,
                   ) -> None:
+        """
+        Normalize in this module means:
+
+        - Use absolute coordinates
+        - Use lineto command rather than implicit lineto command (M/m is
+          followed by multiple pairs of coords)
+
+        :param repr_relative: if True, convert into absolute coords, but
+            show in relative coords. (default False)
+        :param collapse_hv_lineto: if True, convert H/h, V/v commands into
+            L/l commands. (default False)
+        :param collapse_elliptical_arc: if True, convert A/a commands into
+            C/c commands. (default False)
+        :param allow_implicit_lineto: if True, keep implicit lineto
+            commands. (default False)
+        """
         
         if not self._absolutized:
             self.absolutize()
@@ -171,9 +218,9 @@ You can continue to transform by the followings:
 
     def segmented_points(self) -> list[TupledPoint]:
         """
-        Returns list of Points. Each Point is segmentation point by a command,
-        either explicit or implicit, and is shown as tuple `(x, y)`.
-        All coordinates are absolute.
+        Return list of Points. Each Point is segmentation point by commands,
+        either explicit or implicit, and is shown as tuple `(x, y)`. All
+        coordinates are absolute.
         """
         ps = self[0].segmented_points()
         last_cmd = Moveto

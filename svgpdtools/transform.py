@@ -13,6 +13,33 @@ class _OrgReprForm:
 
 
 class Transform:
+    """
+    This class represents a transform matrix the same as the SVG's
+    presentation attribute `transform`. Transform functions are provided as
+    static functions. Each function's syntax is also same as the SVG's
+    transform functions.
+
+    - Transform.matrix(a, b, c, d, e, f)
+    - Transform.translate(dx, dy)
+    - Transform.scale(sx, sy)
+    - Transform.rotate(deg, cx, cy)
+    - Transform.skewX(deg)
+    - Transform.skewY(deg)
+
+    The current transformation matrix is computed by multiplying.::
+
+        <g transform="translate(10,10) rotate(45) translate(-10,-10)">
+          ...
+        </g>
+
+    The above transformation of the SVGGElement is equivalent to following::
+
+        import svgpdtools.Transform as T
+        T1, T2, T3 = T.translate(10,10), T.rotate(45), T.translate(-10,-10)
+        ctm = T1 * T2 * T3
+        # or
+        ctm = T.concat([T1, T2, T3])
+    """
     def __init__(self, a=1., b=0., c=0., d=1., e=0., f=0.) -> None:
         self.a, self.b, self.c, self.d, self.e, self.f = a, b, c, d, e, f
         self._org_repr_form: Optional[_OrgReprForm] = None
