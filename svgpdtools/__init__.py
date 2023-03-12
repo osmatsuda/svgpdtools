@@ -4,7 +4,7 @@ import svgpdtools.utils as utils
 import svgpdtools.parser as parser
 
 
-__version__ = "0.1.1"
+__version__ = "0.1.2"
 
 
 def precision(value: int) -> None:

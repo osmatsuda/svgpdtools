@@ -10,6 +10,8 @@ The `svgpdtools` module defines utilities to manipulate pathdata (value of `d` a
 
 ## Examples
 
+Parse a SVG file and apply transform attribute to the pathdata of the path element, and apply another transformation to the pathdata, finally write the svg to a file.
+
 ```python
 import xml.etree.ElementTree as ET
 import svgpdtools as PD

@@ -17,8 +17,8 @@ def pathdata(d: str) -> PathData:
     buff = ''
     for c in d:
         if c.lower() in 'mzlhvcsqta':
-            if buff:
-                pd.append(_make_command(buff.lstrip()))
+            if buff_stripped := buff.lstrip():
+                pd.append(_make_command(buff_stripped))
             buff = c
         else:
             buff += c
